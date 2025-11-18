@@ -1,0 +1,99 @@
+{
+  "contraindications": {
+    "acupuncture": {
+      "absolute": [
+        {
+          "condition": "bleeding_disorders",
+          "description": "Risk of excessive bleeding at needle sites",
+          "severity": "high"
+        },
+        {
+          "condition": "pacemaker",
+          "description": "Electroacupuncture may interfere with device",
+          "severity": "high"
+        }
+      ],
+      "relative": [
+        {
+          "condition": "pregnancy",
+          "description": "Certain points should be avoided",
+          "severity": "moderate",
+          "notes": "Can be safely performed by trained practitioners"
+        },
+        {
+          "condition": "immunocompromised",
+          "description": "Increased infection risk",
+          "severity": "moderate"
+        }
+      ]
+    },
+    "yoga": {
+      "absolute": [],
+      "relative": [
+        {
+          "condition": "severe_osteoporosis",
+          "description": "Risk of fracture with certain poses",
+          "severity": "moderate",
+          "notes": "Modify poses appropriately"
+        },
+        {
+          "condition": "uncontrolled_hypertension",
+          "description": "Some poses increase blood pressure",
+          "severity": "moderate",
+          "notes": "Avoid inversions"
+        },
+        {
+          "condition": "pregnancy",
+          "description": "Some poses not recommended",
+          "severity": "low",
+          "notes": "Prenatal yoga is safe alternative"
+        }
+      ]
+    },
+    "herbal_ashwagandha": {
+      "absolute": [
+        {
+          "condition": "pregnancy",
+          "description": "May cause uterine contractions",
+          "severity": "high"
+        }
+      ],
+      "relative": [
+        {
+          "condition": "thyroid_conditions",
+          "description": "May affect thyroid hormone levels",
+          "severity": "moderate",
+          "notes": "Monitor thyroid function"
+        },
+        {
+          "condition": "autoimmune_disease",
+          "description": "May stimulate immune system",
+          "severity": "moderate"
+        }
+      ]
+    },
+    "massage": {
+      "absolute": [
+        {
+          "condition": "deep_vein_thrombosis",
+          "description": "Risk of dislodging clot",
+          "severity": "high"
+        }
+      ],
+      "relative": [
+        {
+          "condition": "skin_conditions",
+          "description": "May aggravate or spread condition",
+          "severity": "moderate",
+          "notes": "Avoid affected areas"
+        },
+        {
+          "condition": "osteoporosis",
+          "description": "Risk of fracture with deep pressure",
+          "severity": "moderate",
+          "notes": "Use light pressure only"
+        }
+      ]
+    }
+  }
+}

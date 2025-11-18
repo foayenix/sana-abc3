@@ -1,0 +1,70 @@
+{
+  "interventions": [
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440001",
+      "name": "Hatha Yoga",
+      "category": "yoga",
+      "evidence_rating": "strong",
+      "target_domains": ["physical", "emotional", "spiritual"],
+      "contraindications": [],
+      "typical_duration_minutes": 60,
+      "cost_estimate": 20,
+      "description": "Traditional yoga practice focusing on physical postures and breathing"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440002",
+      "name": "Mindfulness Meditation",
+      "category": "meditation",
+      "evidence_rating": "strong",
+      "target_domains": ["emotional", "cognitive", "spiritual"],
+      "contraindications": [],
+      "typical_duration_minutes": 20,
+      "cost_estimate": 0,
+      "description": "Present-moment awareness practice for stress reduction"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440003",
+      "name": "Acupuncture for Stress",
+      "category": "acupuncture",
+      "evidence_rating": "moderate",
+      "target_domains": ["physical", "emotional"],
+      "contraindications": ["bleeding_disorders", "pacemaker"],
+      "typical_duration_minutes": 45,
+      "cost_estimate": 80,
+      "description": "Traditional Chinese medicine technique using fine needles"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440004",
+      "name": "Ashwagandha Supplementation",
+      "category": "herbal",
+      "evidence_rating": "moderate",
+      "target_domains": ["physical", "emotional", "cognitive"],
+      "contraindications": ["pregnancy", "thyroid_conditions", "autoimmune"],
+      "typical_duration_minutes": 5,
+      "cost_estimate": 30,
+      "description": "Adaptogenic herb for stress and energy support"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440005",
+      "name": "Swedish Massage",
+      "category": "massage",
+      "evidence_rating": "moderate",
+      "target_domains": ["physical", "emotional"],
+      "contraindications": ["deep_vein_thrombosis", "skin_conditions"],
+      "typical_duration_minutes": 60,
+      "cost_estimate": 90,
+      "description": "Relaxation massage using long flowing strokes"
+    },
+    {
+      "id": "770e8400-e29b-41d4-a716-446655440006",
+      "name": "Guided Imagery",
+      "category": "meditation",
+      "evidence_rating": "moderate",
+      "target_domains": ["emotional", "cognitive"],
+      "contraindications": [],
+      "typical_duration_minutes": 15,
+      "cost_estimate": 0,
+      "description": "Visualization technique for relaxation and healing"
+    }
+  ]
+}

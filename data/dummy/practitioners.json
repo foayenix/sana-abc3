@@ -1,0 +1,68 @@
+{
+  "practitioners": [
+    {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "full_name": "Dr. Sarah Chen",
+      "specialties": ["Acupuncture", "Traditional Chinese Medicine"],
+      "credentials": ["L.Ac", "NCCAOM", "PhD TCM"],
+      "verified": true,
+      "sana_index_score": 92.5,
+      "hourly_rate": 150,
+      "profile": {
+        "bio": "20+ years experience in integrative pain management",
+        "years_experience": 22,
+        "location": "San Francisco, CA",
+        "languages": ["English", "Mandarin"],
+        "modalities": ["Acupuncture", "Herbal Medicine", "Cupping"]
+      }
+    },
+    {
+      "id": "660e8400-e29b-41d4-a716-446655440002",
+      "full_name": "John Williams, RYT-500",
+      "specialties": ["Yoga", "Meditation", "Breathwork"],
+      "credentials": ["RYT-500", "YACEP", "Meditation Teacher"],
+      "verified": true,
+      "sana_index_score": 88.0,
+      "hourly_rate": 80,
+      "profile": {
+        "bio": "Specializing in therapeutic yoga for stress and anxiety",
+        "years_experience": 15,
+        "location": "Los Angeles, CA",
+        "languages": ["English", "Spanish"],
+        "modalities": ["Hatha Yoga", "Vinyasa", "Restorative Yoga"]
+      }
+    },
+    {
+      "id": "660e8400-e29b-41d4-a716-446655440003",
+      "full_name": "Dr. Maria Garcia, ND",
+      "specialties": ["Naturopathy", "Herbal Medicine", "Nutrition"],
+      "credentials": ["ND", "CNHP", "RH"],
+      "verified": true,
+      "sana_index_score": 90.2,
+      "hourly_rate": 125,
+      "profile": {
+        "bio": "Holistic approach to chronic disease management",
+        "years_experience": 18,
+        "location": "Portland, OR",
+        "languages": ["English", "Spanish"],
+        "modalities": ["Herbal Medicine", "Nutritional Counseling", "Homeopathy"]
+      }
+    },
+    {
+      "id": "660e8400-e29b-41d4-a716-446655440004",
+      "full_name": "James Kim, RMT",
+      "specialties": ["Massage Therapy", "Shiatsu"],
+      "credentials": ["RMT", "NCBTMB"],
+      "verified": false,
+      "sana_index_score": 75.8,
+      "hourly_rate": 90,
+      "profile": {
+        "bio": "Deep tissue and sports massage specialist",
+        "years_experience": 8,
+        "location": "Seattle, WA",
+        "languages": ["English", "Korean"],
+        "modalities": ["Deep Tissue", "Swedish", "Shiatsu"]
+      }
+    }
+  ]
+}

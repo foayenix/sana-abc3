@@ -1,0 +1,123 @@
+{
+  "protocols": {
+    "ashwagandha": {
+      "name": "Ashwagandha",
+      "type": "herbal_supplement",
+      "forms": ["capsule", "powder", "liquid_extract"],
+      "dosing": {
+        "standard": {
+          "amount": "300-600mg",
+          "frequency": "twice daily",
+          "timing": "with meals",
+          "duration": "8-12 weeks for full effect"
+        },
+        "stress_relief": {
+          "amount": "250-300mg",
+          "frequency": "twice daily",
+          "notes": "Standardized to 5% withanolides"
+        },
+        "sleep_support": {
+          "amount": "300mg",
+          "frequency": "once daily",
+          "timing": "1-2 hours before bed"
+        }
+      },
+      "safety_notes": [
+        "Generally well tolerated",
+        "Mild GI upset possible initially",
+        "Allow 2-4 weeks to assess response"
+      ]
+    },
+    "turmeric": {
+      "name": "Turmeric/Curcumin",
+      "type": "herbal_supplement",
+      "forms": ["capsule", "powder", "liquid"],
+      "dosing": {
+        "standard": {
+          "amount": "500-1000mg curcumin",
+          "frequency": "1-2 times daily",
+          "timing": "with meals and fat source",
+          "notes": "Look for piperine/bioperine for absorption"
+        },
+        "anti_inflammatory": {
+          "amount": "1000-1500mg",
+          "frequency": "daily in divided doses",
+          "duration": "4-8 weeks minimum"
+        }
+      },
+      "safety_notes": [
+        "May interact with blood thinners",
+        "Take with fat for better absorption",
+        "GI upset possible at high doses"
+      ]
+    },
+    "valerian": {
+      "name": "Valerian Root",
+      "type": "herbal_supplement",
+      "forms": ["capsule", "tea", "tincture"],
+      "dosing": {
+        "sleep": {
+          "amount": "300-600mg",
+          "frequency": "30-60 minutes before bed",
+          "duration": "2-4 weeks for full effect"
+        },
+        "anxiety": {
+          "amount": "120-200mg",
+          "frequency": "3 times daily",
+          "notes": "Lower doses for daytime use"
+        }
+      },
+      "safety_notes": [
+        "May cause morning grogginess",
+        "Do not combine with sedatives",
+        "Not for long-term use without breaks"
+      ]
+    },
+    "yoga_practice": {
+      "name": "Yoga Practice",
+      "type": "mind_body",
+      "protocols": {
+        "beginner": {
+          "frequency": "2-3 times per week",
+          "duration": "30-45 minutes",
+          "intensity": "gentle",
+          "progression": "Add 1 session after 4 weeks"
+        },
+        "intermediate": {
+          "frequency": "3-5 times per week",
+          "duration": "45-60 minutes",
+          "intensity": "moderate",
+          "notes": "Include variety of styles"
+        },
+        "therapeutic": {
+          "frequency": "daily",
+          "duration": "15-30 minutes",
+          "intensity": "gentle to moderate",
+          "notes": "Focus on specific condition"
+        }
+      }
+    },
+    "meditation_practice": {
+      "name": "Meditation",
+      "type": "mind_body",
+      "protocols": {
+        "beginner": {
+          "frequency": "daily",
+          "duration": "5-10 minutes",
+          "progression": "Add 5 minutes every 2 weeks"
+        },
+        "standard": {
+          "frequency": "daily",
+          "duration": "20-30 minutes",
+          "timing": "morning or evening",
+          "notes": "Consistent time improves habit formation"
+        },
+        "intensive": {
+          "frequency": "twice daily",
+          "duration": "30-45 minutes",
+          "notes": "For experienced practitioners"
+        }
+      }
+    }
+  }
+}

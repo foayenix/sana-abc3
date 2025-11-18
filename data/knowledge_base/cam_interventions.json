@@ -1,0 +1,160 @@
+{
+  "categories": {
+    "yoga": {
+      "name": "Yoga",
+      "description": "Mind-body practice combining physical postures, breathing, and meditation",
+      "interventions": [
+        {
+          "name": "Hatha Yoga",
+          "description": "Traditional yoga focusing on physical postures and breath control",
+          "typical_session": 60,
+          "frequency": "2-3 times per week",
+          "evidence_level": "strong"
+        },
+        {
+          "name": "Vinyasa Flow",
+          "description": "Dynamic yoga linking breath with movement",
+          "typical_session": 60,
+          "frequency": "2-3 times per week",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Restorative Yoga",
+          "description": "Gentle yoga using props for deep relaxation",
+          "typical_session": 75,
+          "frequency": "1-2 times per week",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Yin Yoga",
+          "description": "Slow-paced yoga targeting connective tissues",
+          "typical_session": 60,
+          "frequency": "1-2 times per week",
+          "evidence_level": "moderate"
+        }
+      ]
+    },
+    "meditation": {
+      "name": "Meditation",
+      "description": "Mental training practices for awareness and calm",
+      "interventions": [
+        {
+          "name": "Mindfulness Meditation",
+          "description": "Present-moment awareness without judgment",
+          "typical_session": 20,
+          "frequency": "daily",
+          "evidence_level": "strong"
+        },
+        {
+          "name": "Guided Imagery",
+          "description": "Visualization for relaxation and healing",
+          "typical_session": 15,
+          "frequency": "daily",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Loving-Kindness Meditation",
+          "description": "Cultivating compassion and positive emotions",
+          "typical_session": 20,
+          "frequency": "daily",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Body Scan",
+          "description": "Progressive attention to body sensations",
+          "typical_session": 30,
+          "frequency": "daily",
+          "evidence_level": "moderate"
+        }
+      ]
+    },
+    "acupuncture": {
+      "name": "Acupuncture",
+      "description": "Traditional Chinese medicine using fine needles",
+      "interventions": [
+        {
+          "name": "Traditional Acupuncture",
+          "description": "Needle insertion at specific points for healing",
+          "typical_session": 45,
+          "frequency": "1-2 times per week",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Auricular Acupuncture",
+          "description": "Ear acupuncture for various conditions",
+          "typical_session": 30,
+          "frequency": "1-2 times per week",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Electroacupuncture",
+          "description": "Acupuncture with mild electrical stimulation",
+          "typical_session": 45,
+          "frequency": "1-2 times per week",
+          "evidence_level": "moderate"
+        }
+      ]
+    },
+    "herbal": {
+      "name": "Herbal Medicine",
+      "description": "Plant-based remedies for health support",
+      "interventions": [
+        {
+          "name": "Ashwagandha",
+          "description": "Adaptogenic herb for stress and energy",
+          "typical_session": 5,
+          "frequency": "daily",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Turmeric",
+          "description": "Anti-inflammatory herb",
+          "typical_session": 5,
+          "frequency": "daily",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Valerian Root",
+          "description": "Herb for sleep and relaxation",
+          "typical_session": 5,
+          "frequency": "as needed",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Rhodiola",
+          "description": "Adaptogen for fatigue and stress",
+          "typical_session": 5,
+          "frequency": "daily",
+          "evidence_level": "moderate"
+        }
+      ]
+    },
+    "massage": {
+      "name": "Massage Therapy",
+      "description": "Manual manipulation of soft tissues",
+      "interventions": [
+        {
+          "name": "Swedish Massage",
+          "description": "Relaxation massage with flowing strokes",
+          "typical_session": 60,
+          "frequency": "weekly",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Deep Tissue",
+          "description": "Firm pressure for chronic tension",
+          "typical_session": 60,
+          "frequency": "weekly",
+          "evidence_level": "moderate"
+        },
+        {
+          "name": "Shiatsu",
+          "description": "Japanese finger pressure massage",
+          "typical_session": 60,
+          "frequency": "weekly",
+          "evidence_level": "weak"
+        }
+      ]
+    }
+  }
+}

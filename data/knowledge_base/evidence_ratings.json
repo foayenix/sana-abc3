@@ -1,0 +1,61 @@
+{
+  "rating_definitions": {
+    "strong": {
+      "description": "Multiple high-quality RCTs with consistent results",
+      "confidence": "High confidence in effectiveness",
+      "recommendation": "Recommended for most patients"
+    },
+    "moderate": {
+      "description": "Some RCTs or high-quality observational studies",
+      "confidence": "Moderate confidence in effectiveness",
+      "recommendation": "Consider for appropriate patients"
+    },
+    "weak": {
+      "description": "Limited studies or inconsistent results",
+      "confidence": "Low confidence in effectiveness",
+      "recommendation": "May consider with informed consent"
+    },
+    "insufficient": {
+      "description": "No quality studies available",
+      "confidence": "Cannot determine effectiveness",
+      "recommendation": "Not recommended without more evidence"
+    }
+  },
+  "intervention_evidence": {
+    "mindfulness_meditation": {
+      "condition": "Anxiety",
+      "rating": "strong",
+      "studies": 45,
+      "effect_size": "moderate",
+      "notes": "Consistent benefits across multiple populations"
+    },
+    "hatha_yoga": {
+      "condition": "Chronic Low Back Pain",
+      "rating": "strong",
+      "studies": 32,
+      "effect_size": "moderate",
+      "notes": "Comparable to physical therapy in some studies"
+    },
+    "acupuncture": {
+      "condition": "Chronic Pain",
+      "rating": "moderate",
+      "studies": 28,
+      "effect_size": "small to moderate",
+      "notes": "Better than sham in some but not all studies"
+    },
+    "ashwagandha": {
+      "condition": "Stress and Anxiety",
+      "rating": "moderate",
+      "studies": 12,
+      "effect_size": "moderate",
+      "notes": "Promising results but more research needed"
+    },
+    "swedish_massage": {
+      "condition": "Anxiety",
+      "rating": "moderate",
+      "studies": 15,
+      "effect_size": "small to moderate",
+      "notes": "Short-term benefits well documented"
+    }
+  }
+}

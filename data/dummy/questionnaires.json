@@ -1,0 +1,204 @@
+{
+  "questionnaires": {
+    "physical": {
+      "domain": "physical",
+      "questions": [
+        {
+          "id": "phys_1",
+          "text": "How would you rate your overall physical energy levels?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Low", "50": "Moderate", "100": "Excellent"}
+        },
+        {
+          "id": "phys_2",
+          "text": "How well do you sleep on average?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Poorly", "50": "Adequately", "100": "Very Well"}
+        },
+        {
+          "id": "phys_3",
+          "text": "How would you rate your physical pain levels?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Severe Pain", "50": "Mild Pain", "100": "No Pain"}
+        },
+        {
+          "id": "phys_4",
+          "text": "How active are you on a daily basis?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Sedentary", "50": "Moderately Active", "100": "Very Active"}
+        },
+        {
+          "id": "phys_5",
+          "text": "How would you rate your digestive health?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Poor", "50": "Fair", "100": "Excellent"}
+        }
+      ]
+    },
+    "emotional": {
+      "domain": "emotional",
+      "questions": [
+        {
+          "id": "emot_1",
+          "text": "How would you rate your overall mood stability?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Unstable", "50": "Moderate", "100": "Very Stable"}
+        },
+        {
+          "id": "emot_2",
+          "text": "How well do you manage stress?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Poorly", "50": "Adequately", "100": "Very Well"}
+        },
+        {
+          "id": "emot_3",
+          "text": "How often do you feel anxious?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Always", "50": "Sometimes", "100": "Never"}
+        },
+        {
+          "id": "emot_4",
+          "text": "How connected do you feel to your emotions?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Disconnected", "50": "Somewhat", "100": "Very Connected"}
+        },
+        {
+          "id": "emot_5",
+          "text": "How resilient do you feel in challenging situations?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Not Resilient", "50": "Moderately", "100": "Very Resilient"}
+        }
+      ]
+    },
+    "social": {
+      "domain": "social",
+      "questions": [
+        {
+          "id": "soc_1",
+          "text": "How satisfied are you with your social relationships?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Dissatisfied", "50": "Neutral", "100": "Very Satisfied"}
+        },
+        {
+          "id": "soc_2",
+          "text": "How supported do you feel by friends and family?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Not Supported", "50": "Somewhat", "100": "Very Supported"}
+        },
+        {
+          "id": "soc_3",
+          "text": "How comfortable are you in social situations?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Uncomfortable", "50": "Neutral", "100": "Very Comfortable"}
+        },
+        {
+          "id": "soc_4",
+          "text": "How often do you engage in meaningful social activities?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Never", "50": "Sometimes", "100": "Frequently"}
+        },
+        {
+          "id": "soc_5",
+          "text": "How connected do you feel to your community?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Isolated", "50": "Somewhat", "100": "Very Connected"}
+        }
+      ]
+    },
+    "cognitive": {
+      "domain": "cognitive",
+      "questions": [
+        {
+          "id": "cog_1",
+          "text": "How would you rate your ability to focus and concentrate?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Poor", "50": "Moderate", "100": "Excellent"}
+        },
+        {
+          "id": "cog_2",
+          "text": "How clear is your thinking on a daily basis?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Foggy", "50": "Moderate", "100": "Crystal Clear"}
+        },
+        {
+          "id": "cog_3",
+          "text": "How well do you retain new information?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Very Poorly", "50": "Adequately", "100": "Very Well"}
+        },
+        {
+          "id": "cog_4",
+          "text": "How effective are you at problem-solving?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Ineffective", "50": "Moderate", "100": "Very Effective"}
+        },
+        {
+          "id": "cog_5",
+          "text": "How creative do you feel in your daily life?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Not Creative", "50": "Somewhat", "100": "Very Creative"}
+        }
+      ]
+    },
+    "spiritual": {
+      "domain": "spiritual",
+      "questions": [
+        {
+          "id": "spir_1",
+          "text": "How connected do you feel to a sense of purpose?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Disconnected", "50": "Somewhat", "100": "Very Connected"}
+        },
+        {
+          "id": "spir_2",
+          "text": "How often do you practice mindfulness or meditation?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Never", "50": "Sometimes", "100": "Daily"}
+        },
+        {
+          "id": "spir_3",
+          "text": "How at peace do you feel with yourself?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Not at Peace", "50": "Moderate", "100": "Very Peaceful"}
+        },
+        {
+          "id": "spir_4",
+          "text": "How meaningful do you find your daily activities?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Meaningless", "50": "Somewhat", "100": "Very Meaningful"}
+        },
+        {
+          "id": "spir_5",
+          "text": "How connected do you feel to nature or the world around you?",
+          "scale_min": 0,
+          "scale_max": 100,
+          "scale_labels": {"0": "Disconnected", "50": "Somewhat", "100": "Very Connected"}
+        }
+      ]
+    }
+  }
+}

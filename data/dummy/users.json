@@ -1,0 +1,52 @@
+{
+  "users": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "email": "alice.johnson@example.com",
+      "full_name": "Alice Johnson",
+      "age": 35,
+      "created_at": "2024-01-15T10:30:00Z",
+      "profile": {
+        "preferences": {
+          "preferred_modalities": ["yoga", "meditation"],
+          "time_preference": "morning"
+        },
+        "health_goals": ["reduce_stress", "improve_sleep", "increase_energy"],
+        "budget_weekly": 150,
+        "time_available_weekly": 180
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "email": "bob.smith@example.com",
+      "full_name": "Bob Smith",
+      "age": 42,
+      "created_at": "2024-01-20T14:45:00Z",
+      "profile": {
+        "preferences": {
+          "preferred_modalities": ["acupuncture", "herbal"],
+          "time_preference": "evening"
+        },
+        "health_goals": ["manage_pain", "improve_focus"],
+        "budget_weekly": 200,
+        "time_available_weekly": 120
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "email": "carol.williams@example.com",
+      "full_name": "Carol Williams",
+      "age": 28,
+      "created_at": "2024-02-01T09:00:00Z",
+      "profile": {
+        "preferences": {
+          "preferred_modalities": ["meditation", "nutrition"],
+          "time_preference": "afternoon"
+        },
+        "health_goals": ["boost_immunity", "reduce_anxiety"],
+        "budget_weekly": 100,
+        "time_available_weekly": 240
+      }
+    }
+  ]
+}
