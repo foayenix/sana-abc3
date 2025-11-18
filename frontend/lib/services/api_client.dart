@@ -326,6 +326,38 @@ class ApiClient {
     }
   }
 
+  // Safety / SST
+  Future<Map<String, dynamic>> testSafetyScenario({
+    String scenario = 'safe',
+  }) async {
+    final response = await _client.get(
+      Uri.parse(
+        '${Endpoints.baseUrl}${Endpoints.apiPrefix}/safety/test-scenarios?'
+        'scenario=$scenario',
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  Future<Map<String, dynamic>> getSafetyResources() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/safety/resources',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getSafetyThresholds() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/safety/thresholds',
+    );
+    return response;
+  }
+
   void dispose() {
     _client.close();
   }
