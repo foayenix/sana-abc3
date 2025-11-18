@@ -5,7 +5,7 @@ Contains Pydantic models for health scores and metrics.
 """
 
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from uuid import UUID, uuid4
 
@@ -43,7 +43,7 @@ class HealthTrend(BaseModel):
     """Model for health score trends over time."""
     user_id: UUID
     domain: str
-    scores: List[Dict[str, any]]  # list of {date, score}
+    scores: List[Dict[str, Any]]  # list of {date, score}
     trend_direction: str  # improving, stable, declining
     change_percentage: float
 

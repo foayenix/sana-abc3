@@ -399,6 +399,96 @@ class ApiClient {
     return response;
   }
 
+  // Herbs / SHI
+  Future<Map<String, dynamic>> getAllHerbs() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/all-herbs',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> searchHerbs({
+    String? query,
+    String? condition,
+    int minScore = 0,
+    String? minEvidence,
+    int limit = 20,
+  }) async {
+    var url = '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/search?'
+        'min_score=$minScore&limit=$limit';
+    if (query != null && query.isNotEmpty) {
+      url += '&q=$query';
+    }
+    if (condition != null) {
+      url += '&condition=$condition';
+    }
+    if (minEvidence != null) {
+      url += '&min_evidence=$minEvidence';
+    }
+    final response = await get(url);
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getHerbRankings({
+    required String condition,
+    String metric = 'efficacy',
+    int limit = 10,
+  }) async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/rankings?'
+      'condition=$condition&metric=$metric&limit=$limit',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getHerbDetails(String herbId) async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/$herbId',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> compareHerbs(
+    List<String> herbIds, {
+    String? condition,
+  }) async {
+    var url = '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/compare?'
+        'herb_ids=${herbIds.join(",")}';
+    if (condition != null) {
+      url += '&condition=$condition';
+    }
+    final response = await get(url);
+    return response;
+  }
+
+  Future<Map<String, dynamic>> findHerbSynergies({
+    int minScore = 70,
+    String? condition,
+    int limit = 20,
+  }) async {
+    var url = '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/combinations/synergies?'
+        'min_score=$minScore&limit=$limit';
+    if (condition != null) {
+      url += '&condition=$condition';
+    }
+    final response = await get(url);
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getHerbProtocol(String combinationId) async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/combinations/$combinationId/protocol',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getEvidenceLevels() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/herbs/evidence-levels',
+    );
+    return response;
+  }
+
   void dispose() {
     _client.close();
   }
