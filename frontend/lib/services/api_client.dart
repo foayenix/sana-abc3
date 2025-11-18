@@ -192,6 +192,28 @@ class ApiClient {
     }
   }
 
+  // Planning / SHAM
+  Future<Map<String, dynamic>> testSHAMFullFlow({
+    String profile = 'balanced',
+    int timePerDay = 60,
+    double budgetPerWeek = 50.0,
+  }) async {
+    final response = await _client.get(
+      Uri.parse(
+        '${Endpoints.baseUrl}${Endpoints.apiPrefix}/planning/test-full-flow?'
+        'profile=$profile&'
+        'time_per_day=$timePerDay&'
+        'budget_per_week=$budgetPerWeek',
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
   void dispose() {
     _client.close();
   }
