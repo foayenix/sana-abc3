@@ -214,6 +214,54 @@ class ApiClient {
     }
   }
 
+  // Verification / SCVM
+  Future<Map<String, dynamic>> testVerificationFullFlow({
+    String profile = 'standard',
+    String tier = 'standard',
+  }) async {
+    final response = await _client.get(
+      Uri.parse(
+        '${Endpoints.baseUrl}${Endpoints.apiPrefix}/verification/test-full-flow?'
+        'profile=$profile&'
+        'tier=$tier',
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  Future<Map<String, dynamic>> getVerificationTiers() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/verification/tiers',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getSupportedRegistries() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/verification/registries',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getKnownInstitutions() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/verification/institutions',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> checkInstitution(String institutionName) async {
+    return post(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/verification/check-institution?institution_name=$institutionName',
+      {},
+    );
+  }
+
   void dispose() {
     _client.close();
   }
