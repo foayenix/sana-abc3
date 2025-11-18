@@ -150,6 +150,48 @@ class ApiClient {
     });
   }
 
+  // Health Graph / Evidence
+  Future<Map<String, dynamic>> getGraphStatistics() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/evidence/statistics',
+    );
+    return response;
+  }
+
+  Future<List<dynamic>> searchInterventionsByDomain(
+    String domain, {
+    String minEvidence = 'weak',
+  }) async {
+    final response = await _client.get(
+      Uri.parse(
+        '${Endpoints.baseUrl}${Endpoints.apiPrefix}/evidence/interventions/domain/$domain?min_evidence=$minEvidence',
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  Future<List<dynamic>> searchInterventionsByCondition(
+    String condition, {
+    String minEvidence = 'weak',
+  }) async {
+    final response = await _client.get(
+      Uri.parse(
+        '${Endpoints.baseUrl}${Endpoints.apiPrefix}/evidence/interventions/condition/$condition?min_evidence=$minEvidence',
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
   void dispose() {
     _client.close();
   }
