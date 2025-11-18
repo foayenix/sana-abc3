@@ -40,6 +40,12 @@ async def health_check():
     return {"status": "healthy"}
 
 
-# Import routers (will add as we build algorithms)
-# from api.routes import scoring, matching, verification, safety, engagement, evidence, planning, index
-# app.include_router(scoring.router, prefix=f"{settings.API_V1_PREFIX}/scoring", tags=["scoring"])
+# Import routers
+from api.routes import scoring
+
+# Include routers
+app.include_router(
+    scoring.router,
+    prefix=f"{settings.API_V1_PREFIX}/scoring",
+    tags=["scoring"]
+)

@@ -52,6 +52,34 @@ class ApiClient {
   }
 
   // Scoring
+  Future<Map<String, dynamic>> testFullFlow({String profile = 'balanced'}) async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/scoring/test-full-flow?profile=$profile',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> generateDummyQuestionnaire({String profile = 'balanced'}) async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/scoring/generate-dummy?profile=$profile',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> calculateScore(Map<String, dynamic> questionnaire) async {
+    return post(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/scoring/calculate',
+      questionnaire,
+    );
+  }
+
+  Future<Map<String, dynamic>> getDomainInfo() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/scoring/domains/list',
+    );
+    return response;
+  }
+
   Future<Map<String, dynamic>> calculateSismScore(
     String userId,
     Map<String, Map<String, int>> domainResponses,

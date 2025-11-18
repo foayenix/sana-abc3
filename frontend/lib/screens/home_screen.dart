@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'scoring_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,10 +29,15 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 40),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Navigate to algorithm list
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ScoringTestScreen(),
+                  ),
+                );
               },
               icon: const Icon(Icons.science),
-              label: const Text('Test Algorithms'),
+              label: const Text('Test SISM Algorithm'),
             ),
           ],
         ),
