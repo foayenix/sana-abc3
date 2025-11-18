@@ -358,6 +358,47 @@ class ApiClient {
     return response;
   }
 
+  // Learning / SOU
+  Future<Map<String, dynamic>> getLearningMetrics() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/learning/metrics',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> testSOURecommendations({
+    double baselineScore = 45.0,
+    String weakDomain = 'emotional',
+  }) async {
+    final response = await _client.get(
+      Uri.parse(
+        '${Endpoints.baseUrl}${Endpoints.apiPrefix}/learning/test-recommendations?'
+        'baseline_score=$baselineScore&'
+        'weak_domain=$weakDomain',
+      ),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  Future<Map<String, dynamic>> getLearningPhase() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/learning/learning-phase',
+    );
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getTopPerformers() async {
+    final response = await get(
+      '${Endpoints.baseUrl}${Endpoints.apiPrefix}/learning/top-performers',
+    );
+    return response;
+  }
+
   void dispose() {
     _client.close();
   }
