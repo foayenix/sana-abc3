@@ -1,138 +1,191 @@
-# SANA Health Framework
+# SANA Health Platform
 
-A comprehensive AI/ML platform for personalized health and wellness, transforming Complementary & Alternative Medicine (CAM) through evidence-based recommendations and continuous learning.
+A comprehensive AI/ML platform for personalized health and wellness, transforming Complementary & Alternative Medicine (CAM) through evidence-based recommendations, practice management, and continuous learning.
 
 ## Overview
 
-SANA integrates 9 algorithms that work together to assess user health, ensure safety, match practitioners, score herbs and treatments, and optimize interventions based on real outcomes.
+SANA is a complete health platform with three main products:
+- **SANA Market** - Practice management and marketplace for practitioners and clients
+- **SANA Evidence** - AI research infrastructure with outcome measurements
+- **SANA Enterprise** - B2B solutions for NHS, corporate wellness, and clinics
 
-## Implemented Algorithms
+## Platform Architecture
 
-### 1. SISM - Integrative Scoring Model
-**Purpose**: Calculate holistic health scores from questionnaire responses
+### Core Algorithms (10 Algorithms)
 
-- Scores users across 5 domains (0-100 scale):
-  - Emotional, Physical, Social, Cognitive, Spiritual
-- Identifies weak domains needing intervention
-- Weighted scoring based on question importance
-- Provides domain-specific insights
+| Algorithm | Purpose |
+|-----------|---------|
+| **SISM** | Integrative Scoring Model - Calculate holistic health scores |
+| **Health Graph** | Evidence engine - Knowledge base of interventions |
+| **SHAM** | Habit & Activity Model - Create personalized plans |
+| **SCVM** | Credential Vetting - Verify practitioner qualifications |
+| **SPRM** | Practitioner Matching - Match users with practitioners |
+| **SST** | Safety & Triage - Detect health crises |
+| **SOU** | Outcome Uplift - Reinforcement learning with Thompson Sampling |
+| **SHI** | SANA Herb Index - Score herbs and supplements |
+| **SANA Index** | Practitioner credibility scoring (20/20/40/10/10 weights) |
+| **SIRM** | Journal AI with 8 personas for reflective wellness |
 
-### 2. Health Graph - Evidence Engine
-**Purpose**: Knowledge base of evidence-based interventions
+### Platform Services (10 Service Modules)
 
-- Maps conditions to treatments with evidence levels
-- Evidence ratings: Strong, Moderate, Weak, Emerging
-- Links interventions to health domains
-- Provides scientific backing for recommendations
+| Module | Services | Purpose |
+|--------|----------|---------|
+| **Auth** | JWT Authentication | User registration, login, tokens |
+| **Practice** | Scheduling, Clients, Sessions, Booking | Complete practice management |
+| **Marketplace** | Search, Reviews, Discovery | Practitioner discovery and booking |
+| **Payments** | Stripe, Subscriptions, Payouts | Payment processing |
+| **Messaging** | Chat | Client-practitioner communication |
+| **Analytics** | Practitioner, Client, Platform | Comprehensive dashboards |
+| **Wearables** | Apple Health, Fitbit, Oura, WHOOP, Garmin | Health data integration |
+| **Enterprise** | FHIR, NHS, Multi-tenant, Compliance | B2B features |
+| **Widget** | Config, Public API | Embeddable booking widget |
+| **Outcomes** | WHO-5, DASS-21, VAS, CAM | Patient-reported outcome measures |
 
-### 3. SHAM - Habit & Activity Model
-**Purpose**: Create personalized daily activity plans
+## Complete API Endpoints
 
-- Generates optimal activity schedules
-- Respects time and budget constraints
-- Prioritizes weak domains
-- Balances activity types throughout the day
-- Calculates expected improvement scores
+Base URL: `http://localhost:8000/api/v1`
 
-### 4. SCVM - Credential Vetting Model
-**Purpose**: Verify practitioner credentials and qualifications
+### Core Algorithms
 
-- Validates degrees, licenses, and certifications
-- Checks against known institutions and registries
-- Calculates trust scores (0-100)
-- Verification tiers: Basic, Standard, Premium
-- Flags expired or suspicious credentials
+#### Scoring (SISM)
+- `POST /scoring/calculate` - Calculate health score
+- `GET /scoring/domains` - List domains
+- `GET /scoring/questionnaire` - Get questionnaire
 
-### 5. SPRM - Practitioner Recommendation Model
-**Purpose**: Match users with verified practitioners
+#### Evidence (Health Graph)
+- `GET /evidence/interventions/{domain}` - Get interventions
+- `GET /evidence/conditions` - List conditions
+- `GET /evidence/search` - Search interventions
 
-- Filters by budget, distance, and modality
-- Modalities: In-person, Video, Phone, Chat
-- Ranks by specialty match to user's weak domains
-- Calculates match scores based on multiple factors
-- Returns paginated, sorted results
+#### Planning (SHAM)
+- `POST /planning/create` - Create activity plan
+- `GET /planning/activities` - List activities
 
-### 6. SST - Safety & Triage Model
-**Purpose**: Detect health crises and safety concerns
+#### Verification (SCVM)
+- `POST /verification/verify` - Verify credentials
+- `GET /verification/institutions` - List institutions
 
-- Multi-layer risk detection:
-  - Score analysis (critical thresholds)
-  - Trend analysis (rapid decline detection)
-  - Crisis keyword detection in messages
-  - Pattern recognition across domains
-- Safety statuses: Safe, Monitor, Escalate, Urgent
-- Escalation pathways:
-  - NHS 111 for medical concerns
-  - Samaritans (116 123) for emotional crisis
-  - Emergency services (999) for immediate danger
-- Generates human review cases with priority levels
+#### Matching (SPRM)
+- `POST /matching/find` - Find practitioners
+- `GET /matching/modalities` - List modalities
 
-### 7. SOU - Outcome Uplift Model
-**Purpose**: Learn which interventions work best through reinforcement learning
+#### Safety (SST)
+- `POST /safety/analyze` - Analyze user safety
+- `GET /safety/resources` - List safety resources
 
-- Multi-armed bandit for exploration vs exploitation
-- Thompson Sampling for contextual recommendations
-- Learning phases:
-  - Cold Start (<100 outcomes): 50% exploration
-  - Early Learning (100-500): 30% exploration
-  - Mature (>500): 10% exploration
-- Predicts outcomes with confidence intervals
-- Calculates uplift over baseline recommendations
-- Improves continuously as users provide feedback
+#### Learning (SOU)
+- `GET /learning/metrics` - Learning metrics
+- `GET /learning/predict-outcome` - Predict outcomes
+- `GET /learning/top-performers` - Top interventions
 
-### 8. SHI - SANA Herb Index
-**Purpose**: Calculate evidence-based credibility scores for herbs and supplements
+#### Herbs (SHI)
+- `GET /herbs/search` - Search herbs
+- `GET /herbs/rankings` - Herb rankings
+- `GET /herbs/{id}` - Herb details
 
-- 4-component scoring system (0-100):
-  - Evidence Volume (25%): Sample size, practitioner diversity, geography
-  - Efficacy (40%): Improvement rates, effect size (Cohen's d), consistency
-  - Safety (20%): Adverse events, severity weighting, dropout rates
-  - Data Quality (15%): Dosage, outcome, follow-up completeness
-- Evidence levels: Very High, High, Moderate, Low, Insufficient
-- Condition-specific herb rankings
-- Synergy detection for herb combinations
-- Optimal dosage calculations from successful outcomes
-- Bootstrap confidence intervals
+#### Index (SANA Index)
+- `POST /index/calculate` - Calculate practitioner score
+- `GET /index/leaderboard` - Top practitioners
 
-### 9. SANA Index - Practitioner Credibility Score
-**Purpose**: Calculate overall credibility scores for practitioners
+### Platform Services
 
-- 4-component weighted scoring (0-100):
-  - Credentials (30%): Education, licenses, certifications
-  - Outcomes (50%): Client health improvements
-  - Reviews (10%): Client ratings and feedback
-  - Verification (10%): Identity and credential verification
-- Point-based credential scoring (20+ credential types)
-- Institution reputation multipliers (Oxford, Cambridge, NHS, etc.)
-- Percentile ranking against all practitioners
-- Trend detection (improving/stable/declining)
+#### Authentication
+- `POST /auth/register` - Register user
+- `POST /auth/login` - Login
+- `POST /auth/refresh` - Refresh token
+- `GET /auth/me` - Get current user
 
-## Complete User Flow
+#### Practice Management
+- `POST /practice/availability` - Set availability
+- `GET /practice/calendar/{id}` - Get calendar
+- `POST /practice/clients` - Add client
+- `POST /practice/sessions` - Create session
+- `POST /practice/sessions/{id}/notes` - Add SOAP notes
+- `POST /practice/bookings` - Create booking
 
+#### Marketplace
+- `POST /marketplace/search` - Search practitioners
+- `GET /marketplace/practitioners/{id}` - Get profile
+- `POST /marketplace/reviews` - Submit review
+- `GET /marketplace/discover` - Discovery page
+- `GET /marketplace/discover/trending` - Trending practitioners
+
+#### Payments
+- `POST /payments/create-intent` - Create payment
+- `POST /payments/{id}/confirm` - Confirm payment
+- `POST /payments/{id}/refund` - Refund payment
+- `POST /payments/subscriptions` - Create subscription
+- `GET /payments/payouts/balance/{id}` - Get balance
+
+#### Messaging
+- `POST /messaging/conversations` - Start conversation
+- `POST /messaging/conversations/{id}/messages` - Send message
+- `GET /messaging/conversations/{id}/messages` - Get messages
+- `POST /messaging/conversations/{id}/read` - Mark as read
+
+#### Analytics
+- `GET /analytics/practitioner/{id}/dashboard` - Practitioner dashboard
+- `GET /analytics/client/{id}/dashboard` - Client dashboard
+- `GET /analytics/platform/overview` - Platform metrics
+
+#### Wearables
+- `GET /wearables/providers` - Available providers
+- `POST /wearables/connect` - Connect device
+- `POST /wearables/sync/{id}` - Sync data
+- `GET /wearables/summaries/{id}` - Daily summaries
+
+#### Enterprise
+- `POST /enterprise/fhir/patient` - Map to FHIR Patient
+- `GET /enterprise/fhir/patient/{id}/export` - Export as FHIR Bundle
+- `GET /enterprise/nhs/validate/{nhs_number}` - Validate NHS number
+- `POST /enterprise/nhs/referrals` - Create referral
+- `POST /enterprise/tenants` - Create tenant
+- `POST /enterprise/tenants/{id}/sso` - Configure SSO
+- `POST /enterprise/compliance/audit` - Log audit event
+- `GET /enterprise/compliance/gdpr/export/{id}` - GDPR export
+
+#### Widget (Embeddable Booking)
+- `POST /widget/config` - Create widget
+- `GET /widget/config/{id}/embed-code` - Get embed codes
+- `GET /widget/config/{id}/links` - Get shareable links
+- `GET /widget/public/{key}` - Get widget data (no auth)
+- `GET /widget/public/{key}/availability` - Get slots (no auth)
+- `POST /widget/public/{key}/book` - Create booking (no auth)
+- `GET /widget/book/{slug}` - Shareable booking page
+
+#### Outcomes (PROMs)
+- `GET /outcomes/questionnaire/{type}` - Get questionnaire
+- `POST /outcomes/submit` - Submit responses
+- `POST /outcomes/schedule` - Schedule assessments
+
+## Widget Integration
+
+### Embed on Your Website
+
+**Iframe:**
+```html
+<iframe src="https://sana.health/widget/{widget_key}"
+        style="width: 100%; min-height: 600px; border: none;">
+</iframe>
 ```
-User Questionnaire
-       ↓
-   [1. SISM]  →  Health Score & Weak Domains
-       ↓
-   [2. SST]   →  Safety Assessment
-       ↓
-   (If Safe)
-       ↓
-   [3. SPRM]  →  Practitioner Matches
-       ↓
-   [4. SCVM]  →  Credential Verification
-       ↓
-   [9. SANA Index]  →  Practitioner Scoring
-       ↓
-   [5. SHAM]  →  Activity Plan
-       ↓
-   [6. Health Graph]  →  Evidence-Based Interventions
-       ↓
-   [8. SHI]   →  Herb & Treatment Scoring
-       ↓
-   [7. SOU]   →  Optimized Recommendations
-       ↓
-   User Outcomes  →  Feedback Loop to SOU
+
+**JavaScript:**
+```html
+<div id="sana-widget"></div>
+<script src="https://sana.health/widget/embed.js"></script>
+<script>
+  SANAWidget.init({
+    key: 'your-widget-key',
+    container: '#sana-widget',
+    style: 'inline',
+    theme: 'light'
+  });
+</script>
+```
+
+**Shareable Link:**
+```
+https://sana.health/book/{your-slug}
 ```
 
 ## Project Structure
@@ -141,32 +194,32 @@ User Questionnaire
 sana-abc3/
 ├── backend/
 │   ├── algorithms/
-│   │   ├── scoring/      # SISM
-│   │   ├── evidence/     # Health Graph
-│   │   ├── planning/     # SHAM
-│   │   ├── verification/ # SCVM
-│   │   ├── matching/     # SPRM
-│   │   ├── safety/       # SST
-│   │   ├── learning/     # SOU
-│   │   ├── herbs/        # SHI
-│   │   └── index/        # SANA Index
-│   ├── api/routes/       # FastAPI endpoints
-│   ├── tests/
-│   │   ├── test_scoring/
-│   │   ├── test_evidence/
-│   │   ├── test_planning/
-│   │   ├── test_verification/
-│   │   ├── test_matching/
-│   │   ├── test_safety/
-│   │   ├── test_learning/
-│   │   ├── test_herbs/
-│   │   └── integration/  # Complete flow tests
-│   └── utils/
-├── frontend/
-│   ├── lib/
-│   │   ├── screens/      # Test screens for each algorithm
-│   │   └── services/     # API client
-│   └── pubspec.yaml
+│   │   ├── scoring/          # SISM
+│   │   ├── evidence/         # Health Graph, Health Score
+│   │   ├── planning/         # SHAM
+│   │   ├── verification/     # SCVM
+│   │   ├── matching/         # SPRM
+│   │   ├── safety/           # SST
+│   │   ├── learning/         # SOU (Thompson Sampling)
+│   │   ├── herbs/            # SHI
+│   │   ├── index/            # SANA Index
+│   │   ├── reflection/       # SIRM (Journal AI)
+│   │   └── outcomes/         # PROMs
+│   ├── services/
+│   │   ├── auth/             # JWT Authentication
+│   │   ├── practice/         # Scheduling, Clients, Sessions
+│   │   ├── marketplace/      # Search, Reviews, Discovery
+│   │   ├── payments/         # Stripe, Subscriptions, Payouts
+│   │   ├── messaging/        # Chat
+│   │   ├── analytics/        # Dashboards
+│   │   ├── wearables/        # Device Integrations
+│   │   ├── enterprise/       # FHIR, NHS, Multi-tenant
+│   │   └── widget/           # Embeddable Booking
+│   ├── api/routes/           # 20 route modules
+│   ├── database/             # SQLAlchemy models
+│   ├── tests/                # Pytest suites
+│   ├── main.py               # FastAPI app
+│   └── requirements.txt
 └── README.md
 ```
 
@@ -182,12 +235,22 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-### Frontend Setup
+### Environment Variables
 
-```bash
-cd frontend
-flutter pub get
-flutter run -d chrome
+Create `.env` file:
+```env
+# Database
+DATABASE_URL=postgresql://user:pass@localhost:5432/sana
+
+# JWT
+JWT_SECRET_KEY=your-secret-key
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+
+# Wearables
+FITBIT_CLIENT_ID=...
+OURA_CLIENT_ID=...
 ```
 
 ### Docker Setup
@@ -196,128 +259,94 @@ flutter run -d chrome
 docker-compose up -d
 ```
 
-## API Endpoints
-
-Base URL: `http://localhost:8000/api/v1`
-
-### Scoring (SISM)
-- `POST /scoring/calculate` - Calculate health score from questionnaire
-- `GET /scoring/domains` - List available domains
-- `GET /scoring/questionnaire` - Get questionnaire template
-
-### Evidence (Health Graph)
-- `GET /evidence/interventions/{domain}` - Get interventions for domain
-- `GET /evidence/conditions` - List all conditions
-- `GET /evidence/search` - Search interventions
-
-### Planning (SHAM)
-- `POST /planning/create` - Create activity plan
-- `GET /planning/activities` - List available activities
-- `GET /planning/constraints` - Get constraint templates
-
-### Verification (SCVM)
-- `POST /verification/verify` - Verify practitioner credentials
-- `GET /verification/institutions` - List known institutions
-- `GET /verification/credential-types` - List credential types
-
-### Matching (SPRM)
-- `POST /matching/find` - Find practitioner matches
-- `GET /matching/modalities` - List available modalities
-- `GET /matching/specialties` - List specialties
-
-### Safety (SST)
-- `POST /safety/analyze` - Analyze user safety
-- `GET /safety/test-scenarios` - Get test scenarios
-- `GET /safety/resources` - List safety resources
-- `GET /safety/crisis-keywords` - List monitored keywords
-- `GET /safety/thresholds` - Get risk thresholds
-
-### Learning (SOU)
-- `GET /learning/metrics` - Get learning metrics
-- `GET /learning/test-recommendations` - Test recommendation engine
-- `GET /learning/intervention-performance/{id}` - Get intervention stats
-- `GET /learning/predict-outcome` - Predict outcome for intervention
-- `GET /learning/learning-phase` - Get current learning phase
-- `GET /learning/top-performers` - Get top performing interventions
-
-### Herbs (SHI)
-- `GET /herbs/search` - Search herbs with filters
-- `GET /herbs/rankings` - Condition-specific herb rankings
-- `GET /herbs/{id}` - Get herb details with SHI score
-- `GET /herbs/compare` - Compare herbs head-to-head
-- `GET /herbs/combinations/synergies` - Find synergistic combinations
-- `GET /herbs/combinations/{id}/protocol` - Get treatment protocol
-- `GET /herbs/all-herbs` - List all indexed herbs
-- `GET /herbs/evidence-levels` - Get evidence level definitions
-
-### Index (SANA Index)
-- `POST /index/calculate` - Calculate practitioner SANA Index
-- `GET /index/test-calculate` - Test with sample profiles
-- `GET /index/component-weights` - Get scoring weights
-- `GET /index/credential-types` - Get credential point values
-- `GET /index/practitioner/{id}` - Get practitioner score
-- `GET /index/leaderboard` - Top practitioners ranking
-- `GET /index/test-scenarios` - Available test scenarios
-
 ## Testing
 
-### Run All Backend Tests
+### Run All Tests
 
 ```bash
 cd backend
-pytest
+pip install pytest pytest-asyncio pytest-cov
+pytest tests/ -v
 ```
 
-### Run Specific Test Suites
+### Run Specific Tests
 
 ```bash
-# Unit tests by algorithm
-pytest tests/test_scoring/ -v
-pytest tests/test_evidence/ -v
-pytest tests/test_planning/ -v
-pytest tests/test_verification/ -v
-pytest tests/test_matching/ -v
-pytest tests/test_safety/ -v
-pytest tests/test_learning/ -v
-pytest tests/test_herbs/ -v
-
-# Integration tests
-pytest tests/integration/ -v
+pytest tests/test_scoring/ -v       # SISM
+pytest tests/test_learning/ -v      # SOU
+pytest tests/integration/ -v        # Complete flows
 ```
-
-### Test Coverage
-
-- **Unit Tests**: 120+ tests across all algorithms
-- **Integration Tests**: Complete flow tests covering:
-  - End-to-end user journeys
-  - Algorithm interactions
-  - Constraint validation
-  - Error handling
-
-## API Documentation
-
-Interactive API docs available at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
 
 ## Key Features
 
-- **Evidence-Based**: All recommendations backed by Health Graph evidence
-- **Safety-First**: SST monitors for crises and escalates appropriately
-- **Personalized**: Recommendations tailored to user's weak domains
-- **Constraint-Aware**: Respects time, budget, and geographic constraints
-- **Continuously Learning**: SOU improves recommendations over time
-- **Verified Practitioners**: SCVM ensures credential authenticity
-- **Herb Credibility**: SHI scores herbs based on real-world outcomes
-- **Practitioner Scoring**: SANA Index ranks practitioners by performance
+### For Practitioners (SANA Pro)
+- **Practice Management**: Scheduling, client roster, SOAP notes
+- **SANA Index**: Credibility score based on outcomes (40% weight)
+- **Widget**: Embeddable booking for your website
+- **Analytics**: Revenue, clients, sessions, outcomes dashboards
+- **Payouts**: Automated earnings with Stripe Connect
+
+### For Clients (SANA Connect)
+- **Marketplace**: Find practitioners by specialty, location, price
+- **Booking**: Book directly or through practitioner's website
+- **Messaging**: Communicate with practitioners
+- **Progress Tracking**: Health score, PROMs, wearable data
+- **Journal**: AI-powered reflections with 8 personas
+
+### For Enterprise (SANA Enterprise)
+- **NHS Integration**: FHIR R4, PDS lookup, GP referrals
+- **Multi-Tenant**: Corporate wellness, clinics, universities
+- **SSO**: SAML, OIDC, Azure AD, Okta, NHS Login
+- **Compliance**: Audit logging, GDPR export, retention policies
 
 ## Technology Stack
 
-- **Backend**: Python, FastAPI, Pydantic, NumPy
-- **Frontend**: Flutter/Dart
-- **Testing**: pytest, Flutter test
-- **Documentation**: OpenAPI/Swagger
+- **Backend**: Python 3.11, FastAPI, Pydantic v2
+- **Database**: PostgreSQL, SQLAlchemy 2.0
+- **Auth**: JWT (python-jose), bcrypt
+- **Payments**: Stripe
+- **ML**: NumPy, SciPy, scikit-learn
+- **Testing**: pytest, pytest-asyncio
+
+## API Documentation
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## Subscription Tiers
+
+| Tier | Monthly | Features |
+|------|---------|----------|
+| **Free** | £0 | 5 clients, 20 bookings/month |
+| **Basic** | £29 | 50 clients, outcome tracking |
+| **Professional** | £79 | 200 clients, custom branding |
+| **Enterprise** | £199 | Unlimited, dedicated support |
+
+## SANA Index Weights
+
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| Credentials | 20% | Education, licenses, certifications |
+| Volume | 20% | Treatment volume and experience |
+| **Outcomes** | **40%** | Client health improvements |
+| Completeness | 10% | Profile and data completeness |
+| Satisfaction | 10% | Client ratings and reviews |
+
+## Supported Wearables
+
+- Apple Health
+- Fitbit
+- Oura Ring
+- WHOOP
+- Garmin
+- Google Fit
 
 ## License
 
 Proprietary - SANA Technologies Ltd.
+
+---
+
+**Total API Endpoints: 300+**
+**Total Service Modules: 20**
+**Total Algorithms: 10**
