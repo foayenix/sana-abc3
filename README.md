@@ -4,7 +4,7 @@ A comprehensive AI/ML platform for personalized health and wellness, transformin
 
 ## Overview
 
-SANA integrates 7 algorithms that work together to assess user health, ensure safety, match practitioners, and optimize interventions based on real outcomes.
+SANA integrates 9 algorithms that work together to assess user health, ensure safety, match practitioners, score herbs and treatments, and optimize interventions based on real outcomes.
 
 ## Implemented Algorithms
 
@@ -80,6 +80,33 @@ SANA integrates 7 algorithms that work together to assess user health, ensure sa
 - Calculates uplift over baseline recommendations
 - Improves continuously as users provide feedback
 
+### 8. SHI - SANA Herb Index
+**Purpose**: Calculate evidence-based credibility scores for herbs and supplements
+
+- 4-component scoring system (0-100):
+  - Evidence Volume (25%): Sample size, practitioner diversity, geography
+  - Efficacy (40%): Improvement rates, effect size (Cohen's d), consistency
+  - Safety (20%): Adverse events, severity weighting, dropout rates
+  - Data Quality (15%): Dosage, outcome, follow-up completeness
+- Evidence levels: Very High, High, Moderate, Low, Insufficient
+- Condition-specific herb rankings
+- Synergy detection for herb combinations
+- Optimal dosage calculations from successful outcomes
+- Bootstrap confidence intervals
+
+### 9. SANA Index - Practitioner Credibility Score
+**Purpose**: Calculate overall credibility scores for practitioners
+
+- 4-component weighted scoring (0-100):
+  - Credentials (30%): Education, licenses, certifications
+  - Outcomes (50%): Client health improvements
+  - Reviews (10%): Client ratings and feedback
+  - Verification (10%): Identity and credential verification
+- Point-based credential scoring (20+ credential types)
+- Institution reputation multipliers (Oxford, Cambridge, NHS, etc.)
+- Percentile ranking against all practitioners
+- Trend detection (improving/stable/declining)
+
 ## Complete User Flow
 
 ```
@@ -95,9 +122,13 @@ User Questionnaire
        ↓
    [4. SCVM]  →  Credential Verification
        ↓
+   [9. SANA Index]  →  Practitioner Scoring
+       ↓
    [5. SHAM]  →  Activity Plan
        ↓
    [6. Health Graph]  →  Evidence-Based Interventions
+       ↓
+   [8. SHI]   →  Herb & Treatment Scoring
        ↓
    [7. SOU]   →  Optimized Recommendations
        ↓
@@ -116,7 +147,9 @@ sana-abc3/
 │   │   ├── verification/ # SCVM
 │   │   ├── matching/     # SPRM
 │   │   ├── safety/       # SST
-│   │   └── learning/     # SOU
+│   │   ├── learning/     # SOU
+│   │   ├── herbs/        # SHI
+│   │   └── index/        # SANA Index
 │   ├── api/routes/       # FastAPI endpoints
 │   ├── tests/
 │   │   ├── test_scoring/
@@ -126,6 +159,7 @@ sana-abc3/
 │   │   ├── test_matching/
 │   │   ├── test_safety/
 │   │   ├── test_learning/
+│   │   ├── test_herbs/
 │   │   └── integration/  # Complete flow tests
 │   └── utils/
 ├── frontend/
@@ -206,6 +240,25 @@ Base URL: `http://localhost:8000/api/v1`
 - `GET /learning/learning-phase` - Get current learning phase
 - `GET /learning/top-performers` - Get top performing interventions
 
+### Herbs (SHI)
+- `GET /herbs/search` - Search herbs with filters
+- `GET /herbs/rankings` - Condition-specific herb rankings
+- `GET /herbs/{id}` - Get herb details with SHI score
+- `GET /herbs/compare` - Compare herbs head-to-head
+- `GET /herbs/combinations/synergies` - Find synergistic combinations
+- `GET /herbs/combinations/{id}/protocol` - Get treatment protocol
+- `GET /herbs/all-herbs` - List all indexed herbs
+- `GET /herbs/evidence-levels` - Get evidence level definitions
+
+### Index (SANA Index)
+- `POST /index/calculate` - Calculate practitioner SANA Index
+- `GET /index/test-calculate` - Test with sample profiles
+- `GET /index/component-weights` - Get scoring weights
+- `GET /index/credential-types` - Get credential point values
+- `GET /index/practitioner/{id}` - Get practitioner score
+- `GET /index/leaderboard` - Top practitioners ranking
+- `GET /index/test-scenarios` - Available test scenarios
+
 ## Testing
 
 ### Run All Backend Tests
@@ -226,6 +279,7 @@ pytest tests/test_verification/ -v
 pytest tests/test_matching/ -v
 pytest tests/test_safety/ -v
 pytest tests/test_learning/ -v
+pytest tests/test_herbs/ -v
 
 # Integration tests
 pytest tests/integration/ -v
@@ -233,7 +287,7 @@ pytest tests/integration/ -v
 
 ### Test Coverage
 
-- **Unit Tests**: 100+ tests across all algorithms
+- **Unit Tests**: 120+ tests across all algorithms
 - **Integration Tests**: Complete flow tests covering:
   - End-to-end user journeys
   - Algorithm interactions
@@ -254,10 +308,12 @@ Interactive API docs available at:
 - **Constraint-Aware**: Respects time, budget, and geographic constraints
 - **Continuously Learning**: SOU improves recommendations over time
 - **Verified Practitioners**: SCVM ensures credential authenticity
+- **Herb Credibility**: SHI scores herbs based on real-world outcomes
+- **Practitioner Scoring**: SANA Index ranks practitioners by performance
 
 ## Technology Stack
 
-- **Backend**: Python, FastAPI, Pydantic
+- **Backend**: Python, FastAPI, Pydantic, NumPy
 - **Frontend**: Flutter/Dart
 - **Testing**: pytest, Flutter test
 - **Documentation**: OpenAPI/Swagger
