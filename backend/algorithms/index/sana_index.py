@@ -2,10 +2,11 @@
 SANA Index Algorithm
 
 Calculates credibility scores (0-100) for practitioners based on:
-- Credentials: 30% - Qualifications, certifications, education
-- Outcomes: 50% - Client health improvements
-- Reviews: 10% - Client feedback and ratings
-- Verification: 10% - Identity and credential verification status
+- Credentials: 20% - Qualifications, certifications, education
+- Treatment Volume: 20% - Number of clients, sessions logged
+- Outcomes: 40% - Client health improvements, effect sizes
+- Data Completeness: 10% - Note quality, outcome measure compliance
+- Client Satisfaction: 10% - Reviews, rebooking rate, referrals
 """
 import math
 from datetime import datetime
@@ -20,12 +21,13 @@ from .models import IndexInput, IndexOutput, IndexComponent
 class SANAIndexCalculator:
     """SANA Index score calculator for practitioner credibility."""
 
-    # Component weights (must sum to 1.0)
+    # Component weights (must sum to 1.0) - Updated to 20/20/40/10/10 spec
     COMPONENT_WEIGHTS = {
-        "credentials": 0.30,
-        "outcomes": 0.50,
-        "reviews": 0.10,
-        "verification": 0.10
+        "credentials": 0.20,
+        "volume": 0.20,
+        "outcomes": 0.40,
+        "completeness": 0.10,
+        "satisfaction": 0.10
     }
 
     # Credential type scores
@@ -97,7 +99,7 @@ class SANAIndexCalculator:
         """
         components = []
 
-        # Calculate each component
+        # 1. Credentials (20%) - Qualifications, certifications, education
         cred_score, cred_details = self._calculate_credentials_score(
             input_data.credentials
         )
@@ -108,6 +110,18 @@ class SANAIndexCalculator:
             details=cred_details
         ))
 
+        # 2. Treatment Volume (20%) - Number of clients, sessions logged
+        volume_score, volume_details = self._calculate_volume_score(
+            input_data.outcome_data
+        )
+        components.append(IndexComponent(
+            name="volume",
+            score=volume_score,
+            weight=self.COMPONENT_WEIGHTS["volume"],
+            details=volume_details
+        ))
+
+        # 3. Outcomes (40%) - Client health improvements, effect sizes
         outcome_score, outcome_details = self._calculate_outcomes_score(
             input_data.outcome_data
         )
@@ -118,25 +132,28 @@ class SANAIndexCalculator:
             details=outcome_details
         ))
 
-        review_score, review_details = self._calculate_reviews_score(
-            input_data.reviews
+        # 4. Data Completeness (10%) - Note quality, outcome measure compliance
+        completeness_score, completeness_details = self._calculate_completeness_score(
+            input_data.outcome_data,
+            input_data.verification_status
         )
         components.append(IndexComponent(
-            name="reviews",
-            score=review_score,
-            weight=self.COMPONENT_WEIGHTS["reviews"],
-            details=review_details
+            name="completeness",
+            score=completeness_score,
+            weight=self.COMPONENT_WEIGHTS["completeness"],
+            details=completeness_details
         ))
 
-        verif_score, verif_details = self._calculate_verification_score(
-            input_data.verification_status,
-            input_data.credentials
+        # 5. Client Satisfaction (10%) - Reviews, rebooking rate, referrals
+        satisfaction_score, satisfaction_details = self._calculate_satisfaction_score(
+            input_data.reviews,
+            input_data.outcome_data
         )
         components.append(IndexComponent(
-            name="verification",
-            score=verif_score,
-            weight=self.COMPONENT_WEIGHTS["verification"],
-            details=verif_details
+            name="satisfaction",
+            score=satisfaction_score,
+            weight=self.COMPONENT_WEIGHTS["satisfaction"],
+            details=satisfaction_details
         ))
 
         # Calculate weighted overall score
@@ -293,12 +310,195 @@ class SANAIndexCalculator:
             "retention_bonus": round(retention_bonus, 1)
         }
 
+    def _calculate_volume_score(
+        self,
+        outcome_data: Dict
+    ) -> tuple[float, Dict[str, Any]]:
+        """
+        Calculate treatment volume component score (0-100).
+
+        Factors:
+        - Total clients treated
+        - Total sessions logged
+        - Active client ratio
+        """
+        if not outcome_data:
+            return 0.0, {"reason": "No outcome data provided"}
+
+        total_clients = outcome_data.get("total_clients", 0)
+        total_sessions = outcome_data.get("total_sessions", total_clients * 3)  # Estimate
+        active_clients = outcome_data.get("active_clients", total_clients * 0.3)
+
+        # Client volume score (0-50 points)
+        # Logarithmic: 10 clients = 25pts, 50 = 35pts, 200 = 45pts, 500+ = 50pts
+        if total_clients >= 500:
+            client_score = 50
+        elif total_clients >= 10:
+            client_score = 25 + (25 * math.log10(total_clients / 10) / math.log10(50))
+        else:
+            client_score = total_clients * 2.5
+
+        # Session volume score (0-30 points)
+        # Logarithmic: 50 sessions = 15pts, 500 = 25pts, 2000+ = 30pts
+        if total_sessions >= 2000:
+            session_score = 30
+        elif total_sessions >= 50:
+            session_score = 15 + (15 * math.log10(total_sessions / 50) / math.log10(40))
+        else:
+            session_score = total_sessions * 0.3
+
+        # Active ratio bonus (0-20 points)
+        if total_clients > 0:
+            active_ratio = active_clients / total_clients
+            active_score = active_ratio * 20
+        else:
+            active_score = 0
+
+        total_score = client_score + session_score + active_score
+        score = min(100, max(0, total_score))
+
+        return score, {
+            "total_clients": total_clients,
+            "total_sessions": total_sessions,
+            "active_clients": int(active_clients),
+            "client_score": round(client_score, 1),
+            "session_score": round(session_score, 1),
+            "active_score": round(active_score, 1)
+        }
+
+    def _calculate_completeness_score(
+        self,
+        outcome_data: Dict,
+        verification_status: bool
+    ) -> tuple[float, Dict[str, Any]]:
+        """
+        Calculate data completeness component score (0-100).
+
+        Factors:
+        - Note completeness (session notes quality)
+        - Outcome measure compliance (% of sessions with PROMs)
+        - Data recency
+        """
+        if not outcome_data:
+            return 30.0, {"reason": "No outcome data - default low score"}
+
+        # Note completeness (0-40 points)
+        note_completeness = outcome_data.get("note_completeness", 0.5)
+        note_score = note_completeness * 40
+
+        # Outcome measure compliance (0-40 points)
+        outcome_compliance = outcome_data.get("outcome_compliance", 0.3)
+        compliance_score = outcome_compliance * 40
+
+        # Data recency bonus (0-20 points)
+        # Based on how recently data was updated
+        last_session_days = outcome_data.get("days_since_last_session", 30)
+        if last_session_days <= 7:
+            recency_score = 20
+        elif last_session_days <= 30:
+            recency_score = 15
+        elif last_session_days <= 90:
+            recency_score = 10
+        else:
+            recency_score = 5
+
+        total_score = note_score + compliance_score + recency_score
+        score = min(100, max(0, total_score))
+
+        return score, {
+            "note_completeness": round(note_completeness * 100, 1),
+            "outcome_compliance": round(outcome_compliance * 100, 1),
+            "days_since_last_session": last_session_days,
+            "note_score": round(note_score, 1),
+            "compliance_score": round(compliance_score, 1),
+            "recency_score": round(recency_score, 1)
+        }
+
+    def _calculate_satisfaction_score(
+        self,
+        reviews: List[Dict],
+        outcome_data: Dict
+    ) -> tuple[float, Dict[str, Any]]:
+        """
+        Calculate client satisfaction component score (0-100).
+
+        Factors:
+        - Average rating
+        - Number of reviews
+        - Rebooking rate
+        - Referral rate
+        """
+        score_parts = []
+        details = {}
+
+        # Review score (0-50 points)
+        if reviews:
+            ratings = [r.get("rating", 3) for r in reviews]
+            recency_weights = []
+
+            for review in reviews:
+                review_date = review.get("date")
+                if review_date:
+                    try:
+                        if isinstance(review_date, str):
+                            review_year = int(review_date[:4])
+                        else:
+                            review_year = review_date.year
+                        years_old = self.current_year - review_year
+                        recency_weight = max(0.5, 1 - (years_old * 0.1))
+                    except Exception:
+                        recency_weight = 0.8
+                else:
+                    recency_weight = 0.8
+                recency_weights.append(recency_weight)
+
+            weighted_rating = np.average(ratings, weights=recency_weights) if recency_weights else np.mean(ratings)
+            # 3 stars = 30pts, 4 stars = 40pts, 5 stars = 50pts
+            review_score = (weighted_rating - 1) * 12.5
+            details["average_rating"] = round(float(weighted_rating), 2)
+            details["review_count"] = len(reviews)
+        else:
+            review_score = 25  # Default neutral
+            details["average_rating"] = None
+            details["review_count"] = 0
+
+        # Rebooking rate (0-30 points)
+        if outcome_data:
+            rebooking_rate = outcome_data.get("rebooking_rate", 0.5)
+            rebooking_score = rebooking_rate * 30
+            details["rebooking_rate"] = round(rebooking_rate * 100, 1)
+        else:
+            rebooking_score = 15
+            details["rebooking_rate"] = None
+
+        # Referral score (0-20 points)
+        if outcome_data:
+            referral_rate = outcome_data.get("referral_rate", 0.1)
+            referral_score = referral_rate * 100  # 20% referral = 20 points
+            referral_score = min(20, referral_score)
+            details["referral_rate"] = round(referral_rate * 100, 1)
+        else:
+            referral_score = 5
+            details["referral_rate"] = None
+
+        total_score = review_score + rebooking_score + referral_score
+        score = min(100, max(0, total_score))
+
+        details["review_score"] = round(review_score, 1)
+        details["rebooking_score"] = round(rebooking_score, 1)
+        details["referral_score"] = round(referral_score, 1)
+
+        return score, details
+
     def _calculate_reviews_score(
         self,
         reviews: List[Dict]
     ) -> tuple[float, Dict[str, Any]]:
         """
         Calculate reviews component score (0-100).
+
+        Note: This is kept for backwards compatibility.
+        Use _calculate_satisfaction_score for the new 5-component model.
 
         Factors:
         - Average rating

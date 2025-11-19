@@ -177,3 +177,194 @@ async def check_safety(
 async def get_statistics():
     """Get detailed statistics about the health graph"""
     return health_graph.get_statistics()
+
+
+# ============================================================================
+# HEALTH SCORE ENDPOINTS
+# ============================================================================
+
+from algorithms.evidence.health_score import (
+    HealthScoreCalculator,
+    HealthScoreOutput,
+    SANAStatus
+)
+from pydantic import BaseModel, Field
+from typing import Dict
+
+# Initialize health score calculator
+health_score_calculator = HealthScoreCalculator()
+
+
+class HealthScoreRequest(BaseModel):
+    """Request to calculate SANA Health Score."""
+    domain_scores: Dict[str, float] = Field(
+        ...,
+        description="Scores for each domain (0-100)",
+        example={
+            "physical": 65.0,
+            "emotional": 55.0,
+            "social": 70.0,
+            "cognitive": 60.0,
+            "spiritual": 50.0
+        }
+    )
+    chronological_age: int = Field(..., ge=18, le=120)
+    historical_scores: Optional[List[float]] = None
+    current_activities: Optional[List[str]] = None
+
+
+@router.post("/health-score/calculate")
+async def calculate_health_score(request: HealthScoreRequest):
+    """
+    Calculate complete SANA Health Score output.
+
+    Returns:
+    - SANA Health Score (0-100)
+    - SANA Status (needs_support, rebuilding, balanced, thriving, radiant)
+    - SANA Age (biological wellness estimate)
+    - Top 3 Levers (personalized action recommendations)
+    - Weak and strong domains
+    """
+    result = health_score_calculator.calculate(
+        domain_scores=request.domain_scores,
+        chronological_age=request.chronological_age,
+        historical_scores=request.historical_scores,
+        current_activities=request.current_activities
+    )
+
+    # Get status description
+    status_info = health_score_calculator.get_status_description(result.sana_status)
+
+    return {
+        "sana_health_score": result.sana_health_score,
+        "sana_status": {
+            "status": result.sana_status.value,
+            **status_info
+        },
+        "sana_age": result.sana_age,
+        "chronological_age": result.chronological_age,
+        "age_difference": round(result.chronological_age - result.sana_age, 1),
+        "domain_scores": result.domain_scores,
+        "weak_domains": result.weak_domains,
+        "strong_domains": result.strong_domains,
+        "top_levers": [
+            {
+                "priority": lever.priority,
+                "action": lever.action,
+                "domain": lever.domain,
+                "expected_impact": lever.expected_impact,
+                "difficulty": lever.difficulty,
+                "time_investment": lever.time_investment,
+                "evidence_strength": lever.evidence_strength
+            }
+            for lever in result.top_levers
+        ],
+        "score_trend": result.score_trend,
+        "potential_score": result.potential_score
+    }
+
+
+@router.get("/health-score/test")
+async def test_health_score():
+    """Test health score calculation with sample profiles."""
+    profiles = [
+        {
+            "name": "Needs Support",
+            "domain_scores": {
+                "physical": 25.0,
+                "emotional": 30.0,
+                "social": 20.0,
+                "cognitive": 35.0,
+                "spiritual": 15.0
+            },
+            "age": 45
+        },
+        {
+            "name": "Rebuilding",
+            "domain_scores": {
+                "physical": 40.0,
+                "emotional": 35.0,
+                "social": 45.0,
+                "cognitive": 40.0,
+                "spiritual": 30.0
+            },
+            "age": 35
+        },
+        {
+            "name": "Balanced",
+            "domain_scores": {
+                "physical": 55.0,
+                "emotional": 50.0,
+                "social": 60.0,
+                "cognitive": 55.0,
+                "spiritual": 45.0
+            },
+            "age": 40
+        },
+        {
+            "name": "Thriving",
+            "domain_scores": {
+                "physical": 75.0,
+                "emotional": 70.0,
+                "social": 80.0,
+                "cognitive": 65.0,
+                "spiritual": 70.0
+            },
+            "age": 50
+        },
+        {
+            "name": "Radiant",
+            "domain_scores": {
+                "physical": 90.0,
+                "emotional": 85.0,
+                "social": 95.0,
+                "cognitive": 88.0,
+                "spiritual": 92.0
+            },
+            "age": 30
+        }
+    ]
+
+    results = []
+    for profile in profiles:
+        result = health_score_calculator.calculate(
+            domain_scores=profile["domain_scores"],
+            chronological_age=profile["age"]
+        )
+        results.append({
+            "profile": profile["name"],
+            "sana_score": result.sana_health_score,
+            "sana_status": result.sana_status.value,
+            "sana_age": result.sana_age,
+            "chrono_age": result.chronological_age,
+            "age_diff": round(result.chronological_age - result.sana_age, 1),
+            "weak_domains": result.weak_domains,
+            "top_lever": result.top_levers[0].action if result.top_levers else None
+        })
+
+    return {
+        "message": "Test health score calculations complete",
+        "results": results
+    }
+
+
+@router.get("/health-score/status-info")
+async def get_status_info():
+    """Get information about all SANA Status levels."""
+    statuses = {}
+    for status in SANAStatus:
+        statuses[status.value] = health_score_calculator.get_status_description(status)
+
+    return {
+        "statuses": statuses,
+        "note": "Status is determined by overall SANA Health Score"
+    }
+
+
+@router.get("/health-score/domain-weights")
+async def get_domain_weights():
+    """Get the weights used for each wellness domain."""
+    return {
+        "weights": HealthScoreCalculator.DOMAIN_WEIGHTS,
+        "note": "Weights sum to 1.0 and determine domain contribution to overall score"
+    }

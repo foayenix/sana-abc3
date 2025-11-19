@@ -1,13 +1,18 @@
 """
 SOU - SANA Outcome Uplift Model
-Reinforcement learning system that improves recommendations based on real outcomes
+Reinforcement learning system that improves recommendations based on real outcomes.
+
+Uses Thompson Sampling (multi-armed bandit) for optimal exploration vs exploitation.
 """
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from uuid import UUID, uuid4
 import logging
 import math
+import random
 from collections import defaultdict
 from datetime import datetime, timedelta
+import numpy as np
+from scipy import stats
 
 from .models import (
     OutcomeRecord,
@@ -21,6 +26,285 @@ from .models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class ThompsonSampler:
+    """
+    Thompson Sampling implementation for multi-armed bandit.
+
+    Uses Beta distributions for binary outcomes (success/failure)
+    and Normal-Gamma for continuous outcomes (improvement scores).
+    """
+
+    def __init__(self):
+        # Beta distribution parameters for each arm (intervention)
+        # Alpha = successes + 1, Beta = failures + 1 (uninformative prior)
+        self.beta_params: Dict[UUID, Tuple[float, float]] = {}
+
+        # Normal-Gamma parameters for continuous outcomes
+        # (mu, kappa, alpha, beta) for Normal-Gamma posterior
+        self.normal_gamma_params: Dict[UUID, Tuple[float, float, float, float]] = {}
+
+    def update_beta(self, intervention_id: UUID, success: bool):
+        """Update Beta distribution parameters after observing outcome."""
+        if intervention_id not in self.beta_params:
+            self.beta_params[intervention_id] = (1.0, 1.0)  # Uninformative prior
+
+        alpha, beta = self.beta_params[intervention_id]
+        if success:
+            alpha += 1
+        else:
+            beta += 1
+        self.beta_params[intervention_id] = (alpha, beta)
+
+    def update_normal_gamma(self, intervention_id: UUID, value: float):
+        """
+        Update Normal-Gamma distribution after observing continuous outcome.
+
+        Uses conjugate prior update for Normal distribution with unknown
+        mean and variance.
+        """
+        if intervention_id not in self.normal_gamma_params:
+            # Uninformative prior: mu0=0, kappa0=1, alpha0=1, beta0=1
+            self.normal_gamma_params[intervention_id] = (0.0, 1.0, 1.0, 1.0)
+
+        mu0, kappa0, alpha0, beta0 = self.normal_gamma_params[intervention_id]
+
+        # Update with single observation
+        n = 1
+        x_bar = value
+
+        # Posterior parameters
+        kappa_n = kappa0 + n
+        mu_n = (kappa0 * mu0 + n * x_bar) / kappa_n
+        alpha_n = alpha0 + n / 2
+        beta_n = beta0 + 0.5 * n * (x_bar - mu0) ** 2 * kappa0 / kappa_n
+
+        self.normal_gamma_params[intervention_id] = (mu_n, kappa_n, alpha_n, beta_n)
+
+    def sample_beta(self, intervention_id: UUID) -> float:
+        """Sample from Beta distribution for intervention."""
+        if intervention_id not in self.beta_params:
+            return random.random()  # Random for unknown intervention
+
+        alpha, beta = self.beta_params[intervention_id]
+        return np.random.beta(alpha, beta)
+
+    def sample_normal_gamma(self, intervention_id: UUID) -> float:
+        """
+        Sample expected improvement from Normal-Gamma posterior.
+
+        Returns: Sampled mean improvement
+        """
+        if intervention_id not in self.normal_gamma_params:
+            return np.random.normal(15, 10)  # Prior: 15% improvement with high variance
+
+        mu, kappa, alpha, beta = self.normal_gamma_params[intervention_id]
+
+        # Sample precision from Gamma
+        precision = np.random.gamma(alpha, 1/beta)
+
+        # Sample mean from Normal with sampled precision
+        variance = 1 / (kappa * precision)
+        sampled_mean = np.random.normal(mu, math.sqrt(variance))
+
+        return sampled_mean
+
+    def get_expected_value(self, intervention_id: UUID) -> Tuple[float, float]:
+        """
+        Get expected value and uncertainty for intervention.
+
+        Returns: (expected_improvement, uncertainty)
+        """
+        if intervention_id not in self.normal_gamma_params:
+            return (15.0, 20.0)  # High uncertainty for unknown
+
+        mu, kappa, alpha, beta = self.normal_gamma_params[intervention_id]
+
+        # Expected value of mean
+        expected = mu
+
+        # Uncertainty (posterior standard deviation of mean)
+        if alpha > 1:
+            variance = beta / ((alpha - 1) * kappa)
+            uncertainty = math.sqrt(variance)
+        else:
+            uncertainty = 20.0
+
+        return (expected, uncertainty)
+
+    def batch_update(self, outcome_records: List[OutcomeRecord]):
+        """Update all parameters from batch of outcome records."""
+        for record in outcome_records:
+            if not record.completed_full_program:
+                continue
+
+            for intervention_id in record.interventions_actually_used:
+                # Update Beta (success = >10% improvement)
+                success = record.overall_improvement > 10
+                self.update_beta(intervention_id, success)
+
+                # Update Normal-Gamma with actual improvement
+                self.update_normal_gamma(intervention_id, record.overall_improvement)
+
+
+class OutcomePredictor:
+    """
+    Predicts outcomes using user features and historical data.
+
+    Uses k-nearest neighbors with feature similarity weighting.
+    """
+
+    def __init__(self):
+        self.feature_weights = {
+            'baseline_score': 0.3,
+            'weak_domains': 0.3,
+            'age_group': 0.2,
+            'adherence_history': 0.2
+        }
+
+    def predict(
+        self,
+        user_profile: Dict[str, Any],
+        intervention_id: UUID,
+        outcome_records: List[OutcomeRecord],
+        k: int = 30
+    ) -> Tuple[float, float, List[str]]:
+        """
+        Predict outcome for user-intervention pair.
+
+        Args:
+            user_profile: User features
+            intervention_id: Intervention to predict
+            outcome_records: Historical data
+            k: Number of nearest neighbors
+
+        Returns:
+            (predicted_improvement, confidence, key_factors)
+        """
+        # Filter to this intervention
+        relevant = [
+            r for r in outcome_records
+            if intervention_id in r.interventions_actually_used and r.completed_full_program
+        ]
+
+        if not relevant:
+            return (15.0, 10.0, ["No historical data for this intervention"])
+
+        # Calculate similarity scores for each record
+        similarities = []
+        for record in relevant:
+            sim = self._calculate_similarity(user_profile, record)
+            similarities.append((record, sim))
+
+        # Sort by similarity and take top k
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        nearest = similarities[:k]
+
+        if not nearest:
+            return (15.0, 10.0, ["Insufficient similar users"])
+
+        # Weighted average prediction
+        total_weight = sum(sim for _, sim in nearest)
+        if total_weight == 0:
+            predicted = sum(r.overall_improvement for r, _ in nearest) / len(nearest)
+        else:
+            predicted = sum(r.overall_improvement * sim for r, sim in nearest) / total_weight
+
+        # Calculate confidence based on:
+        # 1. Number of similar users
+        # 2. Variance of their outcomes
+        # 3. Average similarity
+        improvements = [r.overall_improvement for r, _ in nearest]
+        variance = np.var(improvements)
+        avg_similarity = total_weight / len(nearest) if nearest else 0
+
+        # Confidence: 0-100 scale
+        n_factor = min(len(nearest) / k, 1.0) * 40  # Up to 40 points for sample size
+        var_factor = max(0, 30 - variance / 2)  # Up to 30 points for low variance
+        sim_factor = avg_similarity * 30  # Up to 30 points for high similarity
+
+        confidence = n_factor + var_factor + sim_factor
+
+        # Key factors
+        key_factors = self._identify_key_factors(user_profile, nearest)
+
+        return (predicted, confidence, key_factors)
+
+    def _calculate_similarity(self, user_profile: Dict[str, Any], record: OutcomeRecord) -> float:
+        """Calculate similarity between user and historical record."""
+        score = 0.0
+
+        # Baseline score similarity (exponential decay)
+        user_baseline = user_profile.get('baseline_score', 50)
+        score_diff = abs(user_baseline - record.baseline_sism_score)
+        score += self.feature_weights['baseline_score'] * math.exp(-score_diff / 20)
+
+        # Weak domain overlap (Jaccard similarity)
+        user_domains = set(user_profile.get('weak_domains', []))
+        record_domains = set(record.baseline_weak_domains)
+        if user_domains or record_domains:
+            jaccard = len(user_domains & record_domains) / len(user_domains | record_domains)
+            score += self.feature_weights['weak_domains'] * jaccard
+
+        # Age group similarity
+        user_age = user_profile.get('age', 35)
+        # Estimate record age from user_id hash (simplified)
+        record_age = 30 + (hash(str(record.user_id)) % 40)
+        age_diff = abs(user_age - record_age)
+        score += self.feature_weights['age_group'] * math.exp(-age_diff / 15)
+
+        # Adherence history (if available)
+        user_adherence = user_profile.get('avg_adherence', 0.7)
+        if record.adherence_level == AdherenceLevel.FULL:
+            record_adherence = 1.0
+        elif record.adherence_level == AdherenceLevel.PARTIAL:
+            record_adherence = 0.5
+        else:
+            record_adherence = 0.0
+
+        adherence_diff = abs(user_adherence - record_adherence)
+        score += self.feature_weights['adherence_history'] * (1 - adherence_diff)
+
+        return score
+
+    def _identify_key_factors(
+        self,
+        user_profile: Dict[str, Any],
+        nearest: List[Tuple[OutcomeRecord, float]]
+    ) -> List[str]:
+        """Identify key factors driving the prediction."""
+        factors = []
+
+        if not nearest:
+            return ["Insufficient data"]
+
+        # Check baseline score
+        user_baseline = user_profile.get('baseline_score', 50)
+        avg_record_baseline = np.mean([r.baseline_sism_score for r, _ in nearest])
+        if abs(user_baseline - avg_record_baseline) < 10:
+            factors.append(f"Similar baseline health score (~{avg_record_baseline:.0f})")
+
+        # Check weak domains
+        user_domains = set(user_profile.get('weak_domains', []))
+        if user_domains:
+            common_domains = []
+            for r, _ in nearest:
+                common_domains.extend(r.baseline_weak_domains)
+            most_common = max(set(common_domains), key=common_domains.count) if common_domains else None
+            if most_common and most_common in user_domains:
+                factors.append(f"Similar weakness in {most_common} domain")
+
+        # Check improvement distribution
+        improvements = [r.overall_improvement for r, _ in nearest]
+        if np.std(improvements) < 5:
+            factors.append("Consistent outcomes in similar users")
+
+        # Sample size
+        if len(nearest) >= 20:
+            factors.append(f"Based on {len(nearest)} similar users")
+
+        return factors if factors else ["General population average"]
 
 
 class SOUAlgorithm:
@@ -49,10 +333,34 @@ class SOUAlgorithm:
     MIN_SAMPLE_FOR_PREDICTION = 30
 
     def __init__(self):
-        """Initialize SOU"""
+        """Initialize SOU with Thompson Sampling and Outcome Predictor."""
         self.intervention_cache: Dict[UUID, InterventionPerformance] = {}
         self.practitioner_cache: Dict[UUID, PractitionerPerformance] = {}
-        logger.info("SOU initialized")
+
+        # Thompson Sampling for exploration/exploitation
+        self.thompson_sampler = ThompsonSampler()
+
+        # Outcome predictor for personalized predictions
+        self.outcome_predictor = OutcomePredictor()
+
+        # Track if model has been trained
+        self.is_trained = False
+
+        logger.info("SOU initialized with Thompson Sampling")
+
+    def train(self, outcome_records: List[OutcomeRecord]):
+        """
+        Train the model on historical outcome data.
+
+        Updates Thompson Sampling parameters for all observed interventions.
+        """
+        logger.info(f"Training SOU on {len(outcome_records)} records")
+
+        # Update Thompson Sampler with all historical data
+        self.thompson_sampler.batch_update(outcome_records)
+
+        self.is_trained = True
+        logger.info("SOU training complete")
 
     def analyze_outcomes(
         self,
@@ -361,41 +669,67 @@ class SOUAlgorithm:
         """
         logger.info(f"Generating SOU recommendations for user {user_id}")
 
+        # Train model if not already trained
+        if not self.is_trained and outcome_records:
+            self.train(outcome_records)
+
         # Determine exploration rate
         if exploration_rate is None:
             metrics = self.analyze_outcomes(outcome_records)
             exploration_rate = metrics.exploration_rate
 
-        # Predict outcomes for each intervention
-        predictions = []
+        # Use Thompson Sampling to rank interventions
+        # Sample from posterior for each intervention
+        thompson_samples = []
         for intervention_id in candidate_interventions:
+            # Sample expected improvement from posterior
+            sampled_value = self.thompson_sampler.sample_normal_gamma(intervention_id)
+
+            # Also get personalized prediction
+            predicted, confidence, factors = self.outcome_predictor.predict(
+                user_profile,
+                intervention_id,
+                outcome_records
+            )
+
+            # Combine Thompson sample with personalized prediction
+            # Weight by confidence in personalized prediction
+            combined = (
+                sampled_value * (1 - confidence / 100) +
+                predicted * (confidence / 100)
+            )
+
+            thompson_samples.append((intervention_id, combined, predicted, confidence, factors))
+
+        # Sort by Thompson-sampled combined score (automatic exploration/exploitation)
+        thompson_samples.sort(key=lambda x: x[1], reverse=True)
+
+        # Build predictions list for compatibility
+        predictions = []
+        for intervention_id, sampled, predicted, confidence, factors in thompson_samples:
+            # Get expected value and uncertainty
+            expected, uncertainty = self.thompson_sampler.get_expected_value(intervention_id)
+
+            # Determine if this is exploration (high uncertainty)
+            is_exploration = uncertainty > 10
+
             prediction = self.predict_outcome(
                 user_id,
                 user_profile,
                 intervention_id,
                 outcome_records
             )
-            predictions.append((intervention_id, prediction))
+            # Override with our better predictions
+            prediction.predicted_improvement = round(predicted, 1)
+            prediction.confidence = round(confidence, 1)
+            prediction.key_factors = factors
 
-        # Sort by predicted improvement (exploitation)
-        predictions.sort(key=lambda x: x[1].predicted_improvement, reverse=True)
-
-        # Apply exploration (randomly promote some low-ranked options)
-        import random
-        num_to_explore = int(len(predictions) * exploration_rate)
-        if num_to_explore > 0 and len(predictions) > 3:
-            # Randomly swap some top predictions with lower ones
-            for i in range(min(num_to_explore, len(predictions) // 2)):
-                if random.random() < exploration_rate:
-                    low_idx = random.randint(len(predictions) // 2, len(predictions) - 1)
-                    predictions[i], predictions[low_idx] = predictions[low_idx], predictions[i]
+            predictions.append((intervention_id, prediction, is_exploration, uncertainty))
 
         # Generate recommendations
         recommendations = []
-        for idx, (intervention_id, prediction) in enumerate(predictions[:5]):  # Top 5
-            is_exploration = idx < num_to_explore
-
-            # Calculate scores (simplified)
+        for idx, (intervention_id, prediction, is_exploration, uncertainty) in enumerate(predictions[:5]):  # Top 5
+            # Calculate scores
             outcome_score = prediction.predicted_improvement
             evidence_score = 75.0  # Would come from Health Graph
             cost_efficiency = outcome_score / 10  # Simplified
@@ -408,24 +742,29 @@ class SOUAlgorithm:
                 time_efficiency * 0.1
             )
 
-            # Generate explanation
+            # Generate explanation based on Thompson Sampling
             if is_exploration:
-                why = f"Exploring this option to gather more data (predicted {prediction.predicted_improvement:.1f}% improvement)"
-                exploration_reason = "Insufficient outcome data - gathering evidence"
+                why = f"Exploring to reduce uncertainty (±{uncertainty:.1f}%). Predicted {prediction.predicted_improvement:.1f}% improvement"
+                exploration_reason = f"High uncertainty ({uncertainty:.1f}%) - Thompson Sampling exploration"
             else:
-                why = f"Predicted {prediction.predicted_improvement:.1f}% improvement based on similar user outcomes"
+                why = f"Predicted {prediction.predicted_improvement:.1f}% improvement ({prediction.confidence:.0f}% confidence)"
                 exploration_reason = None
 
-            # Success rate (% of similar users who improved >10%)
-            similar_outcomes = self._find_similar_user_outcomes(
-                user_profile,
-                intervention_id,
-                outcome_records
-            )
-            if similar_outcomes:
-                success_rate = len([r for r in similar_outcomes if r.overall_improvement > 10]) / len(similar_outcomes) * 100
+            # Success rate using Beta distribution
+            if intervention_id in self.thompson_sampler.beta_params:
+                alpha, beta = self.thompson_sampler.beta_params[intervention_id]
+                success_rate = (alpha / (alpha + beta)) * 100
             else:
-                success_rate = 50.0  # Default
+                # Calculate from similar outcomes
+                similar_outcomes = self._find_similar_user_outcomes(
+                    user_profile,
+                    intervention_id,
+                    outcome_records
+                )
+                if similar_outcomes:
+                    success_rate = len([r for r in similar_outcomes if r.overall_improvement > 10]) / len(similar_outcomes) * 100
+                else:
+                    success_rate = 50.0  # Default
 
             recommendation = SOURecommendation(
                 user_id=user_id,

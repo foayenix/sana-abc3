@@ -25,6 +25,39 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
 
+    # JWT Authentication
+    JWT_SECRET_KEY: str = "your-super-secret-key-change-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Password hashing
+    PASSWORD_MIN_LENGTH: int = 8
+
+    # Email (SendGrid)
+    SENDGRID_API_KEY: Optional[str] = None
+    FROM_EMAIL: str = "noreply@sana.health"
+
+    # SMS (Twilio)
+    TWILIO_ACCOUNT_SID: Optional[str] = None
+    TWILIO_AUTH_TOKEN: Optional[str] = None
+    TWILIO_PHONE_NUMBER: Optional[str] = None
+
+    # Stripe
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+    STRIPE_PLATFORM_FEE_PERCENT: float = 10.0
+
+    # Wearable APIs
+    FITBIT_CLIENT_ID: Optional[str] = None
+    FITBIT_CLIENT_SECRET: Optional[str] = None
+    OURA_CLIENT_ID: Optional[str] = None
+    OURA_CLIENT_SECRET: Optional[str] = None
+    WHOOP_CLIENT_ID: Optional[str] = None
+    WHOOP_CLIENT_SECRET: Optional[str] = None
+    GARMIN_CONSUMER_KEY: Optional[str] = None
+    GARMIN_CONSUMER_SECRET: Optional[str] = None
+
     # Algorithm Parameters
     SISM_DOMAIN_WEIGHTS: dict = {
         "physical": 0.25,
