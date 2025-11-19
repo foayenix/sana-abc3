@@ -41,7 +41,7 @@ async def health_check():
 
 
 # Import routers
-from api.routes import scoring, evidence, planning, verification, matching, safety, learning, herbs, auth, journal, outcomes, practice, marketplace, payments, messaging
+from api.routes import scoring, evidence, planning, verification, matching, safety, learning, herbs, auth, journal, outcomes, practice, marketplace, payments, messaging, analytics, wearables
 from api.routes import index as index_router
 
 # Include routers
@@ -139,4 +139,16 @@ app.include_router(
     messaging.router,
     prefix=f"{settings.API_V1_PREFIX}/messaging",
     tags=["messaging"]
+)
+
+app.include_router(
+    analytics.router,
+    prefix=f"{settings.API_V1_PREFIX}/analytics",
+    tags=["analytics"]
+)
+
+app.include_router(
+    wearables.router,
+    prefix=f"{settings.API_V1_PREFIX}/wearables",
+    tags=["wearables"]
 )
