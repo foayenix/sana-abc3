@@ -4,7 +4,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_DB: sana_algorithms
+      POSTGRES_DB: sana_db
       POSTGRES_USER: sana_user
       POSTGRES_PASSWORD: sana_pass_dev
     ports:
@@ -12,17 +12,42 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   backend:
     build: ./backend
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://sana_user:sana_pass_dev@postgres:5432/sana_algorithms
+      DATABASE_URL: postgresql://sana_user:sana_pass_dev@postgres:5432/sana_db
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-sana-uploads}
     depends_on:
       - postgres
+      - redis
     volumes:
       - ./backend:/app
 
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
+  redis_data:

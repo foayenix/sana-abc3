@@ -42,3 +42,21 @@ Thumbs.db
 data/local/
 *.csv
 *.parquet
+
+# Node
+node_modules/
+npm-debug.log*
+dist/
+
+# Logs
+*.log
+logs/
+
+# Firebase credentials
+**/firebase-credentials.json
+**/serviceAccountKey.json
+
+# Secrets
+*.pem
+*.key
+.env.*.local
