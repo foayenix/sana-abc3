@@ -1,0 +1,646 @@
+================================================================================
+SANA PLATFORM - ALGORITHM & DATA FLOW DIAGRAM
+================================================================================
+
+LAYER 1: USER INPUT & DATA COLLECTION
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      FLUTTER CLIENT APPLICATION                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐      │
+│  │  AUTH SCREEN     │  │  HEALTH ASSESSMENT   │  │  PRACTITIONER │      │
+│  │  - Register      │  │  QUESTIONNAIRE       │  │  SEARCH SCREEN   │      │
+│  │  - Login         │  │  - 35+ questions     │  │  - Filters       │      │
+│  │  - Password      │  │  - 5 domains         │  │  - Location      │      │
+│  │    reset         │  │  - 0-10 ratings      │  │  - Budget        │      │
+│  └────────┬─────────┘  └──────────┬───────────┘  └────────┬────────┘      │
+│           │                       │                       │               │
+│           │ User Credentials      │ Response Data         │ Preferences   │
+│           ▼                       ▼                       ▼               │
+│  ┌────────────────────────────────────────────────────────────────┐    │
+│  │         RIVERPOD STATE MANAGEMENT (Providers)                 │    │
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐         │    │
+│  │  │ auth_prov... │ │ health_prov..│ │ session_prov.│         │    │
+│  │  └──────────────┘ └──────────────┘ └──────────────┘         │    │
+│  └────────────────────────────────────────────────────────────────┘    │
+│           │                       │                       │               │
+└───────────┼───────────────────────┼───────────────────────┼───────────────┘
+            │                       │                       │
+            │ HTTP API Calls        │                       │
+            │                       │                       │
+            ▼                       ▼                       ▼
+          [FastAPI Backend]
+
+================================================================================
+LAYER 2: BACKEND API ROUTES & SERVICES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       FASTAPI BACKEND SERVICES                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  /api/v1/auth/              /api/v1/scoring/           /api/v1/matching/│
+│  ├─ register                ├─ calculate (SISM)        ├─ test-matching │
+│  ├─ login           ────▶   ├─ calculate-with-weights  ├─ practitioners │
+│  ├─ refresh                 └─ test-full-flow          └─ specialties   │
+│  └─ me                                                                    │
+│                                                                          │
+│  AuthService              HealthService              MatchingService    │
+│  ├─ hash_password()       ├─ submitQuestionnaire()   ├─ find_best_match │
+│  ├─ verify_password()     ├─ calculate_score()       └─ score_match()   │
+│  ├─ create_tokens()       └─ track_history()                            │
+│  └─ decode_token()                                                       │
+│                                                                          │
+│  /api/v1/index/            /api/v1/practice/          /api/v1/payments/ │
+│  ├─ calculate (SANA Index) ├─ bookings (CRUD)        ├─ create-intent   │
+│  └─ {id}/index             ├─ availability            ├─ process         │
+│                            └─ scheduling              ├─ payouts         │
+│  SANAIndexService         BookingService            PaymentService      │
+│  ├─ credentials (20%)     ├─ create_booking()      ├─ stripe_payment()  │
+│  ├─ volume (20%)          ├─ confirm_booking()     ├─ calculate_fees()  │
+│  ├─ outcomes (40%)        ├─ cancel_booking()      └─ process_payout()  │
+│  ├─ completeness (10%)    └─ manage_schedule()                          │
+│  └─ satisfaction (10%)                                                   │
+│                                                                          │
+│  /api/v1/messaging/        /api/v1/marketplace/                          │
+│  ├─ conversations         ├─ search                                      │
+│  ├─ messages              ├─ practitioners                               │
+│  ├─ read-receipts         ├─ reviews                                     │
+│  └─ [WebSocket /ws/chat]  └─ discover                                    │
+│                                                                          │
+│  MessagingService         MarketplaceService                            │
+│  ├─ send_message()       ├─ search()                                     │
+│  ├─ mark_read()          ├─ filter()                                     │
+│  └─ archive_conv()       └─ recommend()                                  │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+                                │
+                ────────────────┴────────────────
+                │               │               │
+                ▼               ▼               ▼
+
+================================================================================
+LAYER 3: CORE ALGORITHMS
+================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    SCORING & MATCHING ALGORITHMS                         │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  SISM ALGORITHM (Health Scoring)                                        │
+│  ════════════════════════════════                                        │
+│  Location: /backend/algorithms/scoring/sism.py                          │
+│                                                                           │
+│  Input:  Questionnaire Responses (35+ questions, 5 domains)            │
+│  Process:                                                                │
+│    1. Group responses by domain (physical, emotional, social, etc.)    │
+│    2. Normalize each score to 0-100 scale                              │
+│    3. Calculate weighted average per domain:                           │
+│       - Physical:   0.25 weight                                         │
+│       - Emotional:  0.25 weight                                         │
+│       - Social:     0.15 weight                                         │
+│       - Cognitive:  0.20 weight                                         │
+│       - Spiritual:  0.15 weight                                         │
+│    4. Sum weighted contributions → Overall Score (0-100)               │
+│    5. Identify weak domains (score < 60)                               │
+│  Output: HealthScore Object                                             │
+│    - overall_score: 0-100                                              │
+│    - domain_scores: {physical, emotional, ...}                         │
+│    - weak_domains: [list of domains needing attention]                │
+│    - calculated_at: timestamp                                          │
+│                                                                           │
+│  ┌─────────────────────────────────────────────────────────────┐       │
+│  │ EXAMPLE: User with weak physical & emotional domains        │       │
+│  │ Physical: 45 × 0.25 = 11.25                                │       │
+│  │ Emotional: 52 × 0.25 = 13.0                                │       │
+│  │ Social: 72 × 0.15 = 10.8                                   │       │
+│  │ Cognitive: 68 × 0.20 = 13.6                                │       │
+│  │ Spiritual: 75 × 0.15 = 11.25                               │       │
+│  │ OVERALL SCORE: 59.9 ≈ 60 (Weak - below healthy threshold)  │       │
+│  │ WEAK DOMAINS: [physical, emotional]                         │       │
+│  └─────────────────────────────────────────────────────────────┘       │
+│                                                                           │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  SPRM ALGORITHM (Practitioner Matching)                                │
+│  ═════════════════════════════════════════                             │
+│  Location: /backend/algorithms/matching/sprm.py                        │
+│                                                                           │
+│  Input: SISM Output + User Preferences + Practitioner Pool            │
+│  Process: Multi-stage Filtering & Weighted Scoring                    │
+│                                                                           │
+│  STAGE 1: VERIFICATION FILTERING                                       │
+│  ───────────────────────────────────                                   │
+│  Filter practitioners by SCVM Confidence Score ≥ 85                  │
+│  └─ Keep only verified, trustworthy practitioners                     │
+│                                                                           │
+│  STAGE 2: SPECIALTY MATCHING                                           │
+│  ──────────────────────────────                                        │
+│  Match practitioner specialties with user's weak domains             │
+│  └─ E.g., if weak in "digestive" → Find herbalists, nutritionists   │
+│                                                                           │
+│  STAGE 3: GEOGRAPHY FILTERING                                          │
+│  ─────────────────────────────                                        │
+│  Calculate Haversine distance formula:                                │
+│    distance = 2R·arcsin(√[sin²(Δφ/2) + cos(φ₁)·cos(φ₂)·sin²(Δλ/2)])│
+│  Where R = Earth's radius (6371 km)                                   │
+│  Keep practitioners within max_travel_distance_km                    │
+│  OR willing_to_do_virtual = true                                      │
+│                                                                           │
+│  STAGE 4: BUDGET FILTERING                                             │
+│  ───────────────────────────                                           │
+│  Keep practitioners where:                                             │
+│    hourly_rate ≤ max_budget_per_session                              │
+│    OR offers_sliding_scale = true                                     │
+│                                                                           │
+│  STAGE 5: MULTI-FACTOR SCORING (Weighted Sum)                        │
+│  ───────────────────────────────────────────────                      │
+│                                                                           │
+│  For each remaining practitioner, calculate:                           │
+│                                                                           │
+│  1. HEALTH NEED ALIGNMENT (40% weight)                                │
+│     ─────────────────────────────────                                 │
+│     Score 0-100 based on:                                             │
+│     a) Domain overlap (% of weak domains practitioner covers)         │
+│        overlap = |weak_domains ∩ target_domains| / |weak_domains|   │
+│        → coverage × 60 points                                         │
+│     b) Specialties count: +5 pts per specialty (max 20)              │
+│     c) Experience: clients_treated > 50 ? +10 : ...                 │
+│     d) Outcome improvement: avg improvement > 30% ? +10 : ...       │
+│                                                                           │
+│  2. CREDIBILITY SCORE (25% weight)                                   │
+│     ──────────────────────────────                                    │
+│     Score 0-100 based on:                                             │
+│     a) Verification tier:                                             │
+│        gold → 40 pts, standard → 30 pts, basic → 20 pts             │
+│     b) Years experience:                                              │
+│        10+ → 30 pts, 5+ → 20 pts, 2+ → 10 pts                      │
+│     c) Credentials: min(20, len(credentials) × 5)                   │
+│     d) Professional memberships: min(10, len(memberships) × 3)      │
+│     e) Client satisfaction: (rating / 5) × 5                         │
+│                                                                           │
+│  3. PRACTICAL FIT (20% weight)                                        │
+│     ────────────────────────────                                      │
+│     Score 0-100 based on:                                             │
+│     a) Distance scoring:                                              │
+│        ≤2km   → 40 pts                                                │
+│        ≤5km   → 30 pts                                                │
+│        ≤10km  → 20 pts                                                │
+│        ≤20km  → 10 pts                                                │
+│     b) Affordability: 30 × (1 - affordability_gap × 0.5)            │
+│     c) Accepts new clients → 10 pts                                   │
+│     d) Has availability → 10 pts                                      │
+│     e) Accepts insurance → 10 pts                                     │
+│                                                                           │
+│  4. EVIDENCE ALIGNMENT (10% weight)                                   │
+│     ─────────────────────────────────                                 │
+│     Score 0-100 based on:                                             │
+│     a) Evidence-based approach: 60 pts                                │
+│     b) Uses interventions: min(40, len(interventions) × 8)          │
+│                                                                           │
+│  5. PREFERENCE MATCH (5% weight)                                      │
+│     ──────────────────────────────                                    │
+│     Score 0-100 based on:                                             │
+│     a) Treatment philosophy match: 40 pts                            │
+│     b) Communication style match: 30 pts                             │
+│     c) Language match: 20 pts                                         │
+│     d) Default: 10 pts                                                │
+│                                                                           │
+│  OVERALL SCORE CALCULATION:                                           │
+│  ──────────────────────────                                           │
+│  overall_score = (score₁ × 0.40) + (score₂ × 0.25) + (score₃ × 0.20)│
+│                 + (score₄ × 0.10) + (score₅ × 0.05)                 │
+│  Range: 0-100                                                          │
+│                                                                           │
+│  STAGE 6: RANKING & SELECTION                                         │
+│  ──────────────────────────────                                       │
+│  Sort by overall_score descending                                      │
+│  Select: Top 5 as main recommendations                               │
+│          Next 3 as honorable mentions                                 │
+│                                                                           │
+│  STAGE 7: RECOMMENDATION GENERATION                                   │
+│  ──────────────────────────────────                                   │
+│  For each recommendation, generate:                                    │
+│  - Headline (Excellent/Highly Recommended/Good Match)                │
+│  - Why Recommended (key matching reasons)                             │
+│  - What to Expect (approach, modalities, session focus)              │
+│  - Estimated Sessions Needed (based on SISM score)                  │
+│  - Estimated Total Cost (sessions × hourly_rate)                    │
+│  - Available Time Slots                                               │
+│  - Similar Client Outcomes (if data available)                       │
+│  - Potential Concerns (if any)                                        │
+│                                                                           │
+│  Output: SPRMOutput                                                    │
+│  - top_recommendations: [5 PractitionerRecommendation objects]       │
+│  - honorable_mentions: [3 PractitionerRecommendation objects]        │
+│  - total_practitioners_considered: int                                │
+│  - total_practitioners_filtered: int                                  │
+│  - match_summary: str                                                 │
+│  - key_factors: [list of common factors]                             │
+│                                                                           │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  SANA INDEX ALGORITHM (Practitioner Credibility)                        │
+│  ════════════════════════════════════════════════                       │
+│  Location: /backend/algorithms/index/sana_index.py                     │
+│                                                                           │
+│  Input: Practitioner Data (credentials, outcomes, reviews, volume)    │
+│  Process: 5-Component Scoring Model                                   │
+│                                                                           │
+│  1. CREDENTIALS (20%)                                                  │
+│     ─────────────                                                      │
+│     a) Identify credential types (PhD=25, Masters=20, etc.)          │
+│     b) Apply institution multiplier (Oxford=1.2, standard=1.0)       │
+│     c) Calculate total points (logarithmic scale)                    │
+│     d) Add diversity bonus (unique credential types)                 │
+│     Result: 0-100 score                                               │
+│                                                                           │
+│  2. TREATMENT VOLUME (20%)                                             │
+│     ──────────────────                                                │
+│     a) Client volume score (logarithmic: 10 clients=25pts, 500+=50) │
+│     b) Session volume score (logarithmic: 50=15pts, 2000+=30)       │
+│     c) Active ratio bonus (active_clients / total_clients × 20)     │
+│     Result: 0-100 score                                               │
+│                                                                           │
+│  3. OUTCOMES (40% - Highest Weight!)                                  │
+│     ────────                                                           │
+│     a) Improvement score: min(mean_improvement, 50)                  │
+│     b) Sample size bonus: 5×log₁₀(total_clients) (max 20 pts)       │
+│     c) Consistency bonus: 15×(1 - coefficient_of_variation)         │
+│     d) Retention bonus: retention_rate × 15                          │
+│     Result: 0-100 score                                               │
+│                                                                           │
+│  4. DATA COMPLETENESS (10%)                                            │
+│     ─────────────────────                                             │
+│     a) Note completeness: note_quality% × 40                         │
+│     b) Outcome measure compliance: compliance% × 40                  │
+│     c) Data recency:                                                   │
+│        ≤7 days since last session → 20 pts                           │
+│        ≤30 days → 15 pts                                             │
+│        ≤90 days → 10 pts                                             │
+│        else → 5 pts                                                   │
+│     Result: 0-100 score                                               │
+│                                                                           │
+│  5. CLIENT SATISFACTION (10%)                                          │
+│     ──────────────────────────                                        │
+│     a) Review score: weighted_rating × 12.5 (3★=30, 5★=50)          │
+│     b) Rebooking rate: rebooking_rate × 30 (0-30 pts)              │
+│     c) Referral rate: referral_rate × 100 (max 20 pts)             │
+│     Result: 0-100 score                                               │
+│                                                                           │
+│  OVERALL INDEX CALCULATION:                                           │
+│  ──────────────────────────                                           │
+│  sana_index = Σ(component_score × component_weight)                  │
+│  Range: 0-100                                                          │
+│  Percentile: Estimated based on score distribution                   │
+│  Trend: Improving/Stable/Declining based on historical scores       │
+│                                                                           │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  SCVM ALGORITHM (Credential Verification)                              │
+│  ═════════════════════════════════════════                             │
+│  Location: /backend/algorithms/verification/scvm.py                   │
+│                                                                           │
+│  Input: Uploaded credentials, documents, identity verification       │
+│  Process: Automated + Human-in-Loop Verification                    │
+│                                                                           │
+│  1. Document Analysis (OCR simulation)                                │
+│  2. Credential Pattern Matching                                        │
+│  3. Known Institution Verification                                    │
+│  4. Fraud Detection (99%+ accuracy)                                   │
+│  5. Registry Cross-Reference (if applicable)                          │
+│  6. Confidence Score Calculation                                      │
+│  7. Escalation to Human Review (if needed)                           │
+│                                                                           │
+│  Verification Tiers:                                                   │
+│  - Unverified: No verification completed                             │
+│  - Basic: Minimal credentials verified                               │
+│  - Standard: Moderate credentials verified                           │
+│  - Gold: Comprehensive verification, multiple credentials            │
+│  - Premium: Full verification with human review                      │
+│                                                                           │
+│  Output: VerificationStatus + confidence_score (0-100)              │
+│                                                                           │
+└──────────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+
+================================================================================
+LAYER 4: BUSINESS LOGIC SERVICES
+================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    BOOKING, PAYMENT & MESSAGING FLOWS                    │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  BOOKING FLOW                                                            │
+│  ────────────                                                            │
+│  1. Client selects practitioner from SPRM recommendations              │
+│  2. System displays practitioner's available time slots                │
+│  3. Client chooses date/time, confirms booking                        │
+│  4. Booking record created with status=PENDING                        │
+│  5. Payment intent generated                                           │
+│  6. Practitioner receives notification → confirms/declines            │
+│  7. If confirmed → status=CONFIRMED, send confirmations              │
+│  8. 24 hours before → send reminder to both parties                   │
+│  9. On session date → status=COMPLETED                                │
+│  10. Post-session → link to payment & messaging                        │
+│                                                                           │
+│  PAYMENT FLOW                                                            │
+│  ────────────                                                            │
+│  1. Booking confirmed → Create Stripe PaymentIntent                   │
+│  2. Client completes payment via Stripe (card, Apple Pay, etc.)      │
+│  3. Stripe webhook confirms transaction                               │
+│  4. Payment status: PENDING → PROCESSING → SUCCEEDED                 │
+│  5. Fee Calculation:                                                   │
+│     Platform Fee: 10% of session price                                │
+│     Stripe Fee: ~2.9% + £0.30                                        │
+│     Practitioner Payout: 100% - Platform Fee - Stripe Fee            │
+│  6. Aggregate weekly → Weekly payout to Stripe Connect account       │
+│  7. Payment status: COMPLETED                                          │
+│                                                                           │
+│  MESSAGING FLOW                                                          │
+│  ───────────────                                                        │
+│  1. Booking confirmed → Auto-create Conversation                      │
+│  2. Link conversation to booking_id                                    │
+│  3. Both parties can send messages (TEXT, IMAGE, FILE, SYSTEM)       │
+│  4. Messages delivered via WebSocket (real-time)                      │
+│  5. Auto-mark as read when conversation opened                        │
+│  6. Archive conversation after session completes                      │
+│  7. Enable blocking for safety/disputes                               │
+│                                                                           │
+└──────────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+
+================================================================================
+LAYER 5: DATABASE & PERSISTENCE
+================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          DATABASE SCHEMA                                 │
+│                    (SQLAlchemy ORM Models)                              │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  User (Base Entity)                                                      │
+│  ├─ id, email, hashed_password, role                                    │
+│  ├─ first_name, last_name, phone                                        │
+│  ├─ subscription_tier (FREE | SANA_PLUS | BASIC | PRO | PREMIUM)      │
+│  └─ is_verified (from SCVM)                                             │
+│                                                                           │
+│  ├─→ ClientProfile (1:1 relationship)                                   │
+│  │   ├─ age_range, gender, medical_conditions                          │
+│  │   ├─ health_goals, preferences                                      │
+│  │   └─ location (latitude, longitude)                                 │
+│  │                                                                      │
+│  │   ├─→ HealthScore (1:Many)                                          │
+│  │   │   ├─ overall_score (0-100)                                      │
+│  │   │   ├─ domain_scores {physical, emotional, ...}                   │
+│  │   │   ├─ weak_domains [array]                                       │
+│  │   │   └─ calculated_at (timestamp)                                  │
+│  │   │                                                                  │
+│  │   └─→ Booking (1:Many) [as client_id]                              │
+│  │       ├─ client_id, practitioner_id                                │
+│  │       ├─ scheduled_date, start_time, end_time                      │
+│  │       ├─ status (PENDING|CONFIRMED|COMPLETED|CANCELLED|NO_SHOW)  │
+│  │       ├─ price, deposit_amount                                     │
+│  │       ├─ payment_id (links to Payment)                             │
+│  │       ├─ session_note_id (links to Session)                        │
+│  │       └─ created_at, updated_at                                    │
+│  │           │                                                         │
+│  │           ├─→ Payment (1:1)                                        │
+│  │           │   ├─ stripe_payment_intent_id                          │
+│  │           │   ├─ amount, currency (GBP)                            │
+│  │           │   ├─ platform_fee, stripe_fee, practitioner_payout    │
+│  │           │   ├─ status (PENDING|PROCESSING|SUCCEEDED|FAILED)    │
+│  │           │   └─ created_at, completed_at                         │
+│  │           │                                                         │
+│  │           ├─→ Conversation (1:1)                                   │
+│  │           │   ├─ participant_ids [client_id, practitioner_id]     │
+│  │           │   ├─ status (ACTIVE|ARCHIVED|BLOCKED)                 │
+│  │           │   ├─ last_message_at, last_message_preview           │
+│  │           │   └─ unread_counts {participant_id: count}            │
+│  │           │       │                                                │
+│  │           │       └─→ Message (1:Many)                            │
+│  │           │           ├─ sender_id                                │
+│  │           │           ├─ message_type (TEXT|IMAGE|FILE|SYSTEM)  │
+│  │           │           ├─ content, attachment_url                  │
+│  │           │           ├─ is_read, read_at                        │
+│  │           │           └─ created_at, edited_at, deleted_at       │
+│  │           │                                                         │
+│  │           └─→ Review (1:1)                                         │
+│  │               ├─ practitioner_id                                   │
+│  │               ├─ overall_rating (1-5)                              │
+│  │               ├─ communication_rating, punctuality_rating, etc.   │
+│  │               ├─ title, content                                    │
+│  │               ├─ condition_treated                                 │
+│  │               ├─ practitioner_response                            │
+│  │               └─ created_at, updated_at                           │
+│  │                                                                     │
+│  └─→ Message (1:Many) [as sender_id]                                  │
+│                                                                         │
+│  ├─→ PractitionerProfile (1:1 relationship)                            │
+│  │   ├─ license_number, verification_tier                             │
+│  │   ├─ scvm_confidence_score (0-100)                                │
+│  │   ├─ specialties (Many:Many → Specialty table)                     │
+│  │   ├─ modalities (Many:Many → Modality table)                       │
+│  │   ├─ credentials [array], experience_years                         │
+│  │   ├─ location (latitude, longitude), service_area_km              │
+│  │   ├─ hourly_rate, accepts_insurance                               │
+│  │   ├─ availability_windows [array]                                 │
+│  │   ├─ sana_index_score (0-100, from SANAIndexCalculator)          │
+│  │   ├─ total_clients_treated, average_outcome_improvement           │
+│  │   ├─ client_satisfaction_rating (0-5)                             │
+│  │   └─ verification_status                                           │
+│  │                                                                     │
+│  │   ├─→ Booking (1:Many) [as practitioner_id]                       │
+│  │   │   (see structure above under ClientProfile)                   │
+│  │   │                                                                 │
+│  │   ├─→ Session (1:Many)                                            │
+│  │   │   ├─ booking_id                                               │
+│  │   │   ├─ client_id                                                │
+│  │   │   ├─ chief_complaint, assessment, diagnosis                   │
+│  │   │   ├─ treatment_provided, recommendations                      │
+│  │   │   ├─ outcomes (improvement %, domain improvements)           │
+│  │   │   ├─ follow_up_plan                                           │
+│  │   │   └─ created_at, updated_at                                   │
+│  │   │                                                                 │
+│  │   ├─→ Review (1:Many)                                             │
+│  │   │   (see structure above under ClientProfile)                   │
+│  │   │                                                                 │
+│  │   ├─→ TimeSlot (1:Many)                                           │
+│  │   │   ├─ date, start_time, end_time                               │
+│  │   │   ├─ is_available, is_blocked                                 │
+│  │   │   └─ booking_id (if booked)                                   │
+│  │   │                                                                 │
+│  │   └─→ RecurringAvailability (1:Many)                              │
+│  │       ├─ day_of_week (0-6, Monday-Sunday)                         │
+│  │       ├─ start_time, end_time                                      │
+│  │       └─ is_active                                                 │
+│  │                                                                     │
+│  ├─→ RefreshToken (1:Many)                                             │
+│  │   ├─ token (JWT)                                                    │
+│  │   ├─ expires_at                                                     │
+│  │   └─ revoked (for token revocation)                                 │
+│  │                                                                     │
+│  └─→ Payment (1:Many)                                                  │
+│      (see structure above under Booking)                              │
+│                                                                         │
+│  Specialty (Lookup Table)                                              │
+│  ├─ id, name (acupuncture, herbalism, etc.)                           │
+│  └─ [Many:Many with PractitionerProfile]                              │
+│                                                                         │
+│  Modality (Lookup Table)                                               │
+│  ├─ id, name (TCM, ayurveda, etc.)                                    │
+│  └─ [Many:Many with PractitionerProfile]                              │
+│                                                                         │
+│  Verification (Audit Table)                                            │
+│  ├─ practitioner_id                                                    │
+│  ├─ status (PENDING|VERIFIED|REJECTED|EXPIRED)                       │
+│  ├─ scvm_confidence_score                                              │
+│  ├─ verified_at, expires_at                                           │
+│  └─ review_notes                                                       │
+│                                                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+DATA FLOW SUMMARY
+================================================================================
+
+CLIENT HEALTH ASSESSMENT JOURNEY:
+──────────────────────────────
+
+User Inputs Questionnaire Responses
+            ↓
+        [Network API Call]
+            ↓
+  POST /api/v1/scoring/calculate
+            ↓
+    SISMAlgorithm.calculate()
+            ↓
+    Calculate overall_score (0-100)
+    Identify weak_domains
+            ↓
+    Save HealthScore to database
+            ↓
+    Return to client
+            ↓
+  Display health score + dashboard
+
+
+PRACTITIONER MATCHING JOURNEY:
+──────────────────────────────
+
+Client completes health assessment
+  (SISM Score + Weak Domains)
+            ↓
+   Sets matching preferences
+   (budget, location, language, etc.)
+            ↓
+        [Network API Call]
+            ↓
+  GET /api/v1/matching/test-matching
+            ↓
+   SPRMAlgorithm.find_best_matches()
+            ├─ Filter by verification (SCVM score ≥ 85)
+            ├─ Filter by specialty (match weak domains)
+            ├─ Filter by geography (Haversine distance)
+            ├─ Filter by budget (hourly rate)
+            └─ Score & rank remaining practitioners
+                ├─ Health need alignment (40%)
+                ├─ Credibility score (25%)
+                ├─ Practical fit (20%)
+                ├─ Evidence alignment (10%)
+                └─ Preference match (5%)
+            ↓
+    Top 5 recommendations generated
+            ↓
+    Return to client
+            ↓
+   Display ranked recommendations
+
+
+BOOKING & PAYMENT JOURNEY:
+────────────────────────
+
+Client selects practitioner
+            ↓
+   Views available time slots
+   (from practitioner's recurring availability)
+            ↓
+   Selects date/time, confirms booking
+            ↓
+   POST /api/v1/practice/bookings
+            ↓
+   BookingService.create_booking()
+            ├─ Create Booking record (status=PENDING)
+            └─ Generate Stripe PaymentIntent
+            ↓
+   [Client Payment Flow]
+   POST /api/v1/payments/process
+            ↓
+   StripePaymentService.process_payment()
+            ├─ Call Stripe API
+            ├─ Client completes payment
+            ├─ Stripe webhook confirms
+            └─ Calculate fees & payout
+            ↓
+   Payment Status: PENDING → PROCESSING → SUCCEEDED
+   Booking Status: PENDING → CONFIRMED
+            ↓
+   Send confirmation emails
+            ↓
+   [Pre-Session]
+   24 hours before: send reminders
+            ↓
+   [Session Day]
+   Status: CONFIRMED → COMPLETED
+            ↓
+   [Post-Session]
+   Messaging enabled
+   Review submission available
+            ↓
+   [Post-Session Outcome]
+   Practitioner records session notes
+   Client health outcomes updated
+   Review submitted → ratings collected
+            ↓
+   SANA Index updated (outcomes component)
+            ↓
+   Weekly payout processed
+
+
+MESSAGING FLOW:
+───────────────
+
+Booking Confirmed
+            ↓
+  Auto-create Conversation
+  Link to booking_id
+            ↓
+  Client sends message
+            ↓
+  POST /api/v1/messaging/send
+            ↓
+  MessagingService.send_message()
+            ├─ Create Message record
+            ├─ Update Conversation.last_message_at
+            └─ Emit WebSocket event to recipient
+            ↓
+  WebSocket /ws/chat/{conversation_id}
+  Real-time delivery to practitioner
+            ↓
+  Practitioner receives notification
+            ↓
+  Practitioner reads message
+            ↓
+  Message auto-marked as read
+  Update unread_counts
+            ↓
+  [Continue conversation...]
+
+================================================================================
+END OF DIAGRAM
+================================================================================

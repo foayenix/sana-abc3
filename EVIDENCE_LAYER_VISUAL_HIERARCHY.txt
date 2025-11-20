@@ -1,0 +1,221 @@
+================================================================================
+SANA EVIDENCE LAYER - VISUAL HIERARCHY FOR INFOGRAPHIC
+================================================================================
+
+MAIN CONCEPT: "HOW SANA VALIDATES THAT TREATMENTS WORK"
+
+================================================================================
+LAYER 1: THE 5 EVIDENCE COMPONENTS (Top Section)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SANA EVIDENCE LAYER ECOSYSTEM                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  HEALTH      │  │  PROMs       │  │  HEALTH      │  │ PRACTITIONER │     │
+│  │  GRAPH       │  │  (4 Tools)   │  │  SCORE       │  │  MATCHING    │     │
+│  │              │  │              │  │  (SANA)      │  │  (SPRM)      │     │
+│  │ Knowledge    │  │ Measurement  │  │              │  │              │     │
+│  │ Base         │  │ Tools        │  │ Client       │  │ Evidence:    │     │
+│  │              │  │              │  │ Dashboard    │  │ 10% weight   │     │
+│  │ • Conditions │  │ • WHO-5      │  │              │  │              │     │
+│  │ • Evidence   │  │ • DASS-21    │  │ • 5 domains  │  │ Scores:      │     │
+│  │ • Safety     │  │ • VAS Pain   │  │ • 0-100      │  │ 0-100 pts    │     │
+│  │ • Protocols  │  │ • CAM        │  │ • 5 Status   │  │              │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+LAYER 2: CREDIBILITY PYRAMID (Center Section)
+================================================================================
+
+                         SANA INDEX (Practitioner Score: 0-100)
+                                      ▲
+                                      │
+                            ┌─────────┴─────────┐
+                            │                   │
+                        ╔═══╩═══╗           ╔═══╩═══╗
+                        ║ OVERALL            PERCENTILE
+                        ║ SCORE = 75         RANKING
+                        ╚═════════╝          ╚═════════╝
+                              │
+                    ┌─────────┼─────────┐
+                    │         │         │
+             ╔══════╩═══╗ ╔═══╩════╗ ╔═╩═══════╗
+             ║ OUTCOMES ║ ║ CRED+  ║ ║ VOLUME+ ║
+             ║   40%    ║ ║ 20%    ║ ║  20%    ║
+             ║ (LARGEST)║ ║ (TRUST)║ ║ (EXP)   ║
+             ╚════╤═════╝ ╚═════╤══╝ ╚════╤════╝
+                  │            │         │
+            ┌─────┼─────┐      │         │
+            │     │     │      │         │
+      ┌──────────┬──────────┬────────┐   │       │
+      │Improvement Sample Consistency│Retention
+      │   30 pts  │8.5 pts│12 pts   │11.25 pts
+      └────────────────────────────────┘
+      Total Outcomes: 61.75 → 62/100
+
+
+Data Quality + Satisfaction = Remaining 20%
+      (Completeness: 10%, Satisfaction: 10%)
+
+
+================================================================================
+LAYER 3: MATCHING FACTORS (Right Section)
+================================================================================
+
+            PRACTITIONER MATCH SCORE (SPRM)
+                     
+    Health Need Alignment          40%  ████████
+    ├─ Domain coverage
+    ├─ Experience
+    └─ Credentials
+    
+    Credibility Score              25%  █████
+    ├─ Verification tier
+    ├─ Years experience
+    ├─ Credentials count
+    └─ Client ratings
+    
+    Practical Fit                  20%  ████
+    ├─ Distance
+    ├─ Affordability
+    └─ Availability
+    
+    ★ EVIDENCE ALIGNMENT           10%  ██
+    ├─ Evidence-based approach (60 pts)
+    └─ Per intervention used (8 pts each)
+    
+    Preference Match                5%  █
+    ├─ Philosophy match
+    ├─ Communication style
+    └─ Language
+
+
+================================================================================
+LAYER 4: EVIDENCE COLLECTION TIMELINE (Bottom Section)
+================================================================================
+
+Pre-Session         During Session       Post Session          Follow-ups
+    │                   │                    │                 │
+    ▼                   ▼                    ▼                 ▼
+    
+[T-1]              [T0]                [T+0]           [T+7]  [T+30]
+ │                  │                   │                │      │
+ │              ┌───┴───┐               │            ┌───┴──┐  │
+ │              │       │               │            │      │  │
+Baseline   Treatment   Notes        Immediate    Short-  Sustained
+ PROMs     Conducted  Recorded      Effect      term     Effect
+            + Docs                 PROMs       Check    Validated
+ │              │                   │            │      │
+ └──────────────┴───────────────────┴────────────┴──────┴──→ Time
+
+
+Evidence Collection at Each Stage:
+    • Baseline: WHO-5, DASS-21, VAS, CAM (pre-session metrics)
+    • Post: Same measures (immediate effect)
+    • 1-week: Follow-up compliance & sustainability
+    • 1-month: Sustained improvement (triggers Index update)
+    • 3-month: Long-term validation
+    • 6-month: Extended effectiveness
+
+
+================================================================================
+LAYER 5: EVIDENCE STRENGTH SPECTRUM (Context)
+================================================================================
+
+Evidence Quality Scale (WHO/Cochrane Standards):
+
+    STRONG              MODERATE           WEAK            INSUFFICIENT      
+    ══════              ════════           ════           ════════════
+     Multiple            Some RCTs,         Observational   No quality
+     RCTs,               Systematic         studies,        evidence
+     Meta-              reviews,           Case             Traditional
+     analyses            Evidence           reports,        use only
+                                           Anecdotal
+
+     ████████           █████████          ███████         ████
+     95%+ Confidence    80% Confidence     60% Confidence  <30% Confidence
+     
+
+This ranking determines intervention recommendations!
+
+
+================================================================================
+KEY DATA POINTS TO HIGHLIGHT
+================================================================================
+
+OUTCOMES Component Formula:
+┌────────────────────────────────────────────────────────┐
+│ Score = Improvement + Sample Bonus + Consistency +     │
+│         Retention                                       │
+│ Max:   50        +    20       +    15       +  15  = 100│
+└────────────────────────────────────────────────────────┘
+
+Evidence Score in Matching:
+┌──────────────────────────────────────────────────┐
+│ Evidence = (evidence_based × 60) + (interventions × 8) │
+│ Range: 0-100 points, Weight: 10% of match         │
+└──────────────────────────────────────────────────┘
+
+SANA Health Score:
+┌────────────────────────────────────────────────────┐
+│ 5 Domains (sum with weights):                      │
+│ • Physical (25%) + Emotional (25%)                 │
+│ • Social (15%) + Cognitive (20%)                   │
+│ • Spiritual (15%) = 0-100 score                    │
+│ → 5 Status levels: Needs Support to Radiant       │
+└────────────────────────────────────────────────────┘
+
+
+================================================================================
+UNIQUE DIFFERENTIATORS (Why This Matters)
+================================================================================
+
+✓ OUTCOMES WEIGHTED HEAVIEST (40%)
+  → Not just credentials or volume, but actual patient results
+
+✓ REAL-TIME VALIDATION (PROMs at 4 timepoints)
+  → Not retrospective, but concurrent measurement
+
+✓ STATISTICAL RIGOR (Effect sizes, sample size confidence, consistency)
+  → Not just "people say it works" but measurable improvement
+
+✓ SAFETY FIRST (Automatic contraindication checking)
+  → Prevents harm before it happens
+
+✓ CONTINUOUS LEARNING (Health graph updated with each outcome)
+  → System gets smarter with every client
+
+
+================================================================================
+INFOGRAPHIC FINAL LAYOUT
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    HOW SANA VALIDATES TREATMENT WORKS                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  [EVIDENCE LAYER 5 COMPONENTS]    [CREDIBILITY PYRAMID]   [MATCHING FACTORS] │
+│  (Left 30%)                        (Center 35%)           (Right 35%)        │
+│                                                                               │
+│  Health Graph                      SANA INDEX            Health Need 40%    │
+│  PROMs                             40% OUTCOMES          Credibility 25%    │
+│  Health Score                      20% Credentials       Practical 20%      │
+│  Practitioner Match                20% Volume            ★Evidence 10%      │
+│  Credibility Index                 10% Completeness      Preference 5%      │
+│                                    10% Satisfaction                         │
+│                                                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                     [EVIDENCE COLLECTION TIMELINE]                          │
+│  Pre-Session → Session → Post-Session → 1-week → 1-month → Long-term       │
+│  Baseline    Conducted  Immediate      Check    Validation Analysis         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CORE MESSAGE: SANA ensures clients match with practitioners who            │
+│ PROVABLY WORK - validated through real-time outcomes, clinical evidence,   │
+│ and continuous credibility scoring based primarily on results.             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
