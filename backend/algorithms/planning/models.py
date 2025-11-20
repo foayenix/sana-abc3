@@ -201,3 +201,60 @@ class HabitOutput(BaseModel):
     daily_plan: List[ActivityPlan]
     weekly_summary: Dict
     adherence_prediction: float
+
+
+# Timetable models
+class ScheduleSlot(BaseModel):
+    """A single time slot in a timetable."""
+    start_time: time
+    end_time: time
+    duration_minutes: int
+    activity: Optional[ScheduledActivity] = None
+    is_available: bool = True
+
+
+class TimetableInput(BaseModel):
+    """Input for timetable generation."""
+    user_id: UUID
+    date: datetime
+    constraints: UserConstraints
+    goals: UserGoals
+    existing_activities: List[ScheduledActivity] = []
+
+
+class TimetableOutput(BaseModel):
+    """Output from timetable generation."""
+    user_id: UUID
+    date: datetime
+    schedule_slots: List[ScheduleSlot]
+    daily_schedule: DailySchedule
+    generated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+# Optimizer models
+class AllocationResult(BaseModel):
+    """Result of resource allocation optimization."""
+    activity_id: UUID
+    activity_name: str
+    allocated_time_minutes: int
+    allocated_budget: float
+    expected_benefit: float
+    priority_score: float
+
+
+class OptimizationInput(BaseModel):
+    """Input for optimization algorithm."""
+    user_id: UUID
+    constraints: UserConstraints
+    goals: UserGoals
+    available_interventions: List[Dict] = []
+
+
+class OptimizationOutput(BaseModel):
+    """Output from optimization algorithm."""
+    user_id: UUID
+    allocations: List[AllocationResult]
+    total_time_used: int
+    total_budget_used: float
+    expected_total_benefit: float
+    generated_at: datetime = Field(default_factory=datetime.utcnow)
