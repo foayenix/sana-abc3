@@ -41,7 +41,7 @@ async def health_check():
 
 
 # Import routers
-from api.routes import scoring, evidence, planning, verification, matching, safety, learning, herbs, auth, journal, outcomes, practice, marketplace, payments, messaging, analytics, wearables, enterprise, widget
+from api.routes import scoring, evidence, planning, verification, matching, safety, learning, herbs, auth, journal, outcomes, practice, marketplace, payments, messaging, analytics, wearables, enterprise, widget, scanner, ai_assistant, marketplace_products, freemium
 from api.routes import index as index_router
 
 # Include routers
@@ -163,4 +163,28 @@ app.include_router(
     widget.router,
     prefix=f"{settings.API_V1_PREFIX}/widget",
     tags=["widget"]
+)
+
+app.include_router(
+    scanner.router,
+    prefix=f"{settings.API_V1_PREFIX}/scanner",
+    tags=["scanner"]
+)
+
+app.include_router(
+    ai_assistant.router,
+    prefix=f"{settings.API_V1_PREFIX}/ai",
+    tags=["ai-assistant"]
+)
+
+app.include_router(
+    marketplace_products.router,
+    prefix=f"{settings.API_V1_PREFIX}/marketplace-products",
+    tags=["marketplace-products"]
+)
+
+app.include_router(
+    freemium.router,
+    prefix=f"{settings.API_V1_PREFIX}/freemium",
+    tags=["freemium"]
 )
