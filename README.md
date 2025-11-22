@@ -11,7 +11,7 @@ SANA is a complete health platform with three main products:
 
 ## Platform Architecture
 
-### Core Algorithms (10 Algorithms)
+### Core Algorithms (12 Algorithms)
 
 | Algorithm | Purpose |
 |-----------|---------|
@@ -25,8 +25,10 @@ SANA is a complete health platform with three main products:
 | **SHI** | SANA Herb Index - Score herbs and supplements |
 | **SANA Index** | Practitioner credibility scoring (20/20/40/10/10 weights) |
 | **SIRM** | Journal AI with 8 personas for reflective wellness |
+| **Product Scanner** | "Vivino for Supplements" - Barcode/OCR scanning with safety analysis |
+| **Clinical AI** | AI-powered SOAP notes, diagnosis suggestions, protocol recommendations |
 
-### Platform Services (10 Service Modules)
+### Platform Services (14 Service Modules)
 
 | Module | Services | Purpose |
 |--------|----------|---------|
@@ -40,6 +42,10 @@ SANA is a complete health platform with three main products:
 | **Enterprise** | FHIR, NHS, Multi-tenant, Compliance | B2B features |
 | **Widget** | Config, Public API | Embeddable booking widget |
 | **Outcomes** | WHO-5, DASS-21, VAS, CAM | Patient-reported outcome measures |
+| **Product Scanner** | Barcode, OCR, Safety, Recommendations | Supplement scanning and safety |
+| **AI Assistant** | SOAP, Diagnosis, Protocols, Voice | AI clinical tools for practitioners |
+| **Marketplace Products** | Catalog, Cart, Orders, Prescriptions | E-commerce & practitioner Rx |
+| **Freemium** | Usage, Limits, Upgrades | Tier management and usage tracking |
 
 ## Complete API Endpoints
 
@@ -157,6 +163,54 @@ Base URL: `http://localhost:8000/api/v1`
 - `GET /outcomes/questionnaire/{type}` - Get questionnaire
 - `POST /outcomes/submit` - Submit responses
 - `POST /outcomes/schedule` - Schedule assessments
+
+### New MVP Features
+
+#### Product Scanner ("Vivino for Supplements")
+- `POST /scanner/barcode` - Scan product barcode (UPC, EAN)
+- `POST /scanner/image` - OCR scan label image
+- `GET /scanner/product/{id}` - Get product details
+- `POST /scanner/safety-check` - Personalized safety analysis
+- `POST /scanner/interactions` - Check herb-drug interactions
+- `POST /scanner/recommendations` - Get alternative products
+- `POST /scanner/quick-check` - Quick ingredient safety check
+- `GET /scanner/products/search` - Search product catalog
+- `GET /scanner/products/popular` - Popular products
+- `GET /scanner/history/{user_id}` - User scan history
+
+#### AI Clinical Assistant (Free for Practitioners)
+- `POST /ai/generate-soap` - Generate SOAP note from text/voice
+- `POST /ai/suggest-diagnosis` - Differential diagnosis with ICD-10
+- `POST /ai/recommend-protocol` - Treatment protocol by tradition
+- `POST /ai/voice-to-text` - Transcribe voice (Whisper)
+- `POST /ai/voice-to-soap` - Combined voice → SOAP note
+- `POST /ai/check-red-flags` - Detect urgent symptoms
+- `GET /ai/traditions` - Supported clinical traditions
+- `GET /ai/usage` - AI usage limits
+
+#### Marketplace Products (E-commerce)
+- `GET /marketplace-products/products` - Browse product catalog
+- `GET /marketplace-products/products/{id}` - Product details
+- `GET /marketplace-products/suppliers` - List suppliers
+- `GET /marketplace-products/suppliers/{id}/catalog` - Supplier products
+- `GET /marketplace-products/cart/{user_id}` - Get shopping cart
+- `POST /marketplace-products/cart/{user_id}/add` - Add to cart
+- `POST /marketplace-products/orders/{user_id}` - Create order
+- `POST /marketplace-products/prescriptions` - Practitioner creates Rx
+- `GET /marketplace-products/prescriptions/{id}` - Get prescription
+- `POST /marketplace-products/prescriptions/{id}/purchase` - Buy prescribed items
+- `GET /marketplace-products/commissions/{practitioner_id}` - Commission earnings
+- `POST /marketplace-products/commissions/{practitioner_id}/payout` - Request payout
+
+#### Freemium & Usage Limits
+- `GET /freemium/usage/{user_id}` - Usage summary
+- `GET /freemium/usage/{user_id}/feature/{feature}` - Feature usage
+- `POST /freemium/usage/{user_id}/track` - Track feature usage
+- `GET /freemium/limits` - All tier limits
+- `GET /freemium/limits/{tier}` - Specific tier limits
+- `GET /freemium/upgrade-prompt/{user_id}` - Get upgrade CTA
+- `GET /freemium/pricing` - Tier comparison & pricing
+- `GET /freemium/warning/{user_id}/{feature}` - Limit warning
 
 ## Widget Integration
 
@@ -347,6 +401,6 @@ Proprietary - SANA Technologies Ltd.
 
 ---
 
-**Total API Endpoints: 300+**
-**Total Service Modules: 20**
-**Total Algorithms: 10**
+**Total API Endpoints: 350+**
+**Total Service Modules: 14**
+**Total Algorithms: 12**
